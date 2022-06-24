@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net451</TargetFramework>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <LangVersion>10</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Lightning">
+      <HintPath>..\..\..\ModdedLightning.exe</HintPath>
+    </Reference>
+    <Reference Include="MMHOOK_ModdedLightning">
+      <HintPath>..\..\..\MMHOOK_ModdedLightning.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil">
+      <HintPath>..\..\..\Mono.Cecil.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoMod.RuntimeDetour">
+      <HintPath>..\..\..\MonoMod.RuntimeDetour.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoMod.Utils">
+      <HintPath>..\..\..\MonoMod.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="YamlDotNet">
+      <HintPath>..\..\..\YamlDotNet.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
