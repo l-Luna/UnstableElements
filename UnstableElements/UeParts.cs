@@ -70,7 +70,7 @@ internal class UeParts{
         });
 
         QApi.AddPartTypeToPanel(Volatility, PartTypes.field_1775);
-        QApi.AddPuzzlePermission("unstable-elements-volatility", "Glyph of Volatility");
+        //QApi.AddPuzzlePermission("unstable-elements-volatility", "Glyph of Volatility");
 
         QApi.RunAfterCycle((sim, first) => {
             // look for 3 unheld QSs and free gold
