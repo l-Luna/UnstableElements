@@ -18,8 +18,9 @@ internal class UeParts{
 
 	public static PartType Volatility;
 
-    public static Texture VolatilitySymbol = class_235.method_615("textures/parts/leppa/UnstableElements/volatility_symbol");
-    public static Texture VolatilityBowl= class_235.method_615("textures/parts/leppa/UnstableElements/volatility_bowl");
+    public static Texture VolatilityBase = class_235.method_615("textures/parts/leppa/UnstableElements/volatility_base");
+    public static Texture VolatilityGoldSymbol = class_235.method_615("textures/parts/leppa/UnstableElements/gold_symbol");
+    public static Texture VolatilityMetalBowl = class_235.method_615("textures/parts/leppa/UnstableElements/metal_bowl");
 
     public static void AddPartTypes(){
         Volatility = new(){
@@ -43,14 +44,13 @@ internal class UeParts{
         };
 
         QApi.AddPartType(Volatility, (part, pos, editor, renderer) => {
-			Texture speedBonderBase = class_238.field_1989.field_90./*speed_bonder_base*/field_213;
             Vector2 vector2 = new(83f, 119f);
-            renderer.method_523(speedBonderBase, new Vector2(0.0f, -1f), vector2, 0.0f);
+            renderer.method_523(VolatilityBase, new Vector2(0.0f, -1f), vector2, 0.0f);
             foreach(HexIndex idx in part.method_1159().field_1540){
                 if(idx.Q == 0 && idx.R == 0){
                     renderer.method_530(class_238.field_1989.field_90.field_164 /*bonder_shadow*/, idx, 0);
-                    renderer.method_528(VolatilityBowl, idx, Vector2.Zero);
-                    renderer.method_529(VolatilitySymbol, idx, Vector2.Zero);
+                    renderer.method_528(VolatilityMetalBowl, idx, Vector2.Zero);
+                    renderer.method_529(VolatilityGoldSymbol, idx, Vector2.Zero);
                 }else{
                     renderer.method_530(class_238.field_1989.field_90.field_164 /*bonder_shadow*/, idx, 0);
                     renderer.method_530(class_238.field_1989.field_90.field_255.field_293 /*quicksilver_input*/, idx, 0);
@@ -85,7 +85,7 @@ internal class UeParts{
                     && FindAtom(simData, part, new HexIndex(-1, 1), partsAndGrippers).method_99(out AtomReference qs1)
                     && FindAtom(simData, part, new HexIndex(1, 0), partsAndGrippers).method_99(out AtomReference qs2)
                     && FindAtom(simData, part, new HexIndex(0, -1), partsAndGrippers).method_99(out AtomReference qs3)){
-						// and are thr right types...
+						// and are the right types...
                         if(gold.field_2280 == AtomTypes.field_1686
                         && qs1.field_2280 == AtomTypes.field_1680
                         && qs2.field_2280 == AtomTypes.field_1680
@@ -124,7 +124,6 @@ internal class UeParts{
 
     private static Maybe<AtomReference> FindAtom(DynamicData simData, Part self, HexIndex offset, List<Part> allParts) {
         HexIndex position = self.method_1184(offset);
-        // also check grippers
         foreach(Molecule molecule in simData.Get<List<Molecule>>("field_3823")){
             if(molecule.method_1100().TryGetValue(position, out Atom atom)) {
                 bool flag = false;
