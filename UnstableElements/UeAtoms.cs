@@ -91,11 +91,11 @@ internal class UeAtoms {
 
 
 		Heating = new(new AtomTypeEq()){
-			{ Uranium, UraniumT2 },
-			{ UraniumT2, UShaking1 },
-			{ UShaking1, UShaking1T2 },
-			{ UShaking1T2, UShaking2 },
-			{ UShaking2, UShaking2T2 }
+			{Uranium, UraniumT2},
+			{UraniumT2, UShaking1},
+			{UShaking1, UShaking1T2},
+			{UShaking1T2, UShaking2},
+			{UShaking2, UShaking2T2}
 		};
 
 		// Aether self-destruction
