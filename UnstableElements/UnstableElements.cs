@@ -13,7 +13,7 @@ public class UnstableElements : QuintessentialMod{
 	}
 
 	public override void Unload() {
-		
+		UeAtoms.Unload();
 	}
 
 	public override void LoadPuzzleContent() {

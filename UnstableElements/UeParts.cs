@@ -1,9 +1,11 @@
-﻿namespace UnstableElements;
-
+﻿using System.Linq;
 using MonoMod.Utils;
+
 using System.Collections.Generic;
 
 using Quintessential;
+
+namespace UnstableElements;
 
 using PartType = class_139;
 using PartTypes = class_191;
@@ -12,7 +14,6 @@ using Permissions = enum_149;
 using AtomTypes = class_175;
 
 using Texture = class_256;
-using System.Linq;
 
 internal class UeParts{
 
