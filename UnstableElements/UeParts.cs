@@ -31,6 +31,8 @@ internal class UeParts{
     public static Texture TranquilityMetalBowl = class_235.method_615("textures/parts/leppa/UnstableElements/tranquility_bowl");
     public static Texture TranquilityProjectors = class_235.method_615("textures/parts/leppa/UnstableElements/tranquility_projectors");
 
+    private static readonly string TranquilityPowerId = "UnstableElements:tranquility_powered";
+
     public static void AddPartTypes(){
         Irradiation = new(){
             field_1528 = "unstable-elements-irradiation", // ID
@@ -127,7 +129,13 @@ internal class UeParts{
             renderer.method_530(class_238.field_1989.field_90.field_164 /*bonder_shadow*/, qsSite, 0);
             renderer.method_528(TranquilityMetalBowl, qsSite, Vector2.Zero);
             renderer.method_529(TranquilityQuicksilverSymbol, qsSite, Vector2.Zero);
-        });
+            if(editor.method_503() != enum_128.Stopped && new DynamicData(part).TryGet(TranquilityPowerId, out bool? power) && power == true) {
+				double time = System.Math.Sin(new struct_27(Time.Now().Ticks).method_603());
+                Color tint = Color.White;
+                tint.A *= (float)(time / 3 + .66);
+                DrawForPartWithTint(renderer, TranquilityProjectors, new Vector2(-1, -1), vector2, 0, tint);
+			}
+		});
 
         QApi.AddPartTypeToPanel(Irradiation, PartTypes.field_1775);
         QApi.AddPartTypeToPanel(Volatility, PartTypes.field_1775);
@@ -144,23 +152,23 @@ internal class UeParts{
             var partsAndGrippers = new List<Part>(allParts);
             partsAndGrippers.AddRange(allParts.SelectMany(u => u.field_2696));
             
-            foreach(var part in allParts) {
+            foreach(var part in allParts){
                 var type = part.method_1159();
                 if(type == Irradiation){
                     // if all the atoms exist...
                     if(FindAtom(simData, part, new HexIndex(0, 0), partsAndGrippers).method_99(out AtomReference gold)
                     && FindAtom(simData, part, new HexIndex(-1, 1), partsAndGrippers).method_99(out AtomReference qs1)
                     && FindAtom(simData, part, new HexIndex(1, 0), partsAndGrippers).method_99(out AtomReference qs2)
-                    && FindAtom(simData, part, new HexIndex(0, -1), partsAndGrippers).method_99(out AtomReference qs3)) {
+                    && FindAtom(simData, part, new HexIndex(0, -1), partsAndGrippers).method_99(out AtomReference qs3)){
                         // and are the right types...
                         if(gold.field_2280 == AtomTypes.field_1686
                         && qs1.field_2280 == AtomTypes.field_1680
                         && qs2.field_2280 == AtomTypes.field_1680
-                        && qs3.field_2280 == AtomTypes.field_1680) {
+                        && qs3.field_2280 == AtomTypes.field_1680){
                             // and the quicksilver is not being consumed or held...
                             if(!qs1.field_2281 && !qs1.field_2282
                             && !qs2.field_2281 && !qs2.field_2282
-                            && !qs3.field_2281 && !qs3.field_2282) {
+                            && !qs3.field_2281 && !qs3.field_2282){
                                 // transmutate the gold and destroy the quicksilver
                                 gold.field_2277.method_1106(UeAtoms.Uranium, gold.field_2278);
                                 qs1.field_2277.method_1107(qs1.field_2278);
@@ -186,8 +194,10 @@ internal class UeParts{
                     }
                 }else if(type == Volatility){
                     if(FindAtom(simData, part, new HexIndex(0, 0), partsAndGrippers).method_99(out AtomReference uranium))
-						if(UeAtoms.IsUraniumState(uranium.field_2280))
+                        if(UeAtoms.IsUraniumState(uranium.field_2280))
                             UeAtoms.DoUraniumDecay(uranium.field_2277, uranium.field_2279, uranium.field_2278, seb);
+                }else if(type == Tranquility){
+                    new DynamicData(part).Set(TranquilityPowerId, true);
                 }
 			}
         });
@@ -198,7 +208,7 @@ internal class UeParts{
         foreach(Molecule molecule in simData.Get<List<Molecule>>("field_3823")){
             if(molecule.method_1100().TryGetValue(position, out Atom atom)){
                 bool flag = false;
-                foreach(Part part in allParts) {
+                foreach(Part part in allParts){
                     if(simData.Get<Dictionary<Part, PartSimState>>("field_3821")[part].field_2724 == position){
                         flag = true;
                         break;
@@ -208,5 +218,10 @@ internal class UeParts{
             }
         }
         return struct_18.field_1431;
+    }
+
+    private static void DrawForPartWithTint(class_195 renderer, Texture tex, Vector2 offset, Vector2 size, float rotation, Color c){
+        Matrix4 tf = Matrix4.method_1070((renderer.field_1797 + offset).ToVector3(0)) * Matrix4.method_1073(renderer.field_1798 + rotation) * Matrix4.method_1070(-size.ToVector3(0)) * Matrix4.method_1074(tex.field_2056.ToVector3(0));
+        class_135.method_262(tex, c, tf);
     }
 }
