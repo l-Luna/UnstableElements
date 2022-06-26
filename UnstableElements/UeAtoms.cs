@@ -135,9 +135,7 @@ internal class UeAtoms {
 						if(Heating.ContainsKey(type)){
 							atom.Value.field_2275 = Heating[type];
 						}else if(type == UShaking2T2){
-							// decay
-							molecule.method_1106(AtomTypes.field_1681, atom.Key);
-							atom.Value.field_2276 = new class_168(seb, 0, (enum_132)1, UShaking2T2, class_238.field_1989.field_81.field_614, 30f);
+							DoUraniumDecay(molecule, atom.Value, atom.Key, seb);
 						}
 					}
 				}
@@ -155,6 +153,17 @@ internal class UeAtoms {
 		SimValidationHook.Dispose();
 	}
 
+	public static void DoUraniumDecay(Molecule m, Atom u, HexIndex pos, SolutionEditorBase seb){
+		m.method_1106(AtomTypes.field_1681, pos);
+		u.field_2276 = new class_168(seb, 0, (enum_132)1, UShaking2T2, class_238.field_1989.field_81.field_614, 30f);
+	}
+
+	public static bool IsUraniumState(AtomType type){
+		return type == Uranium || type == UraniumT2
+			|| type == UShaking1 || type == UShaking1T2
+			|| type == UShaking2 || type == UShaking2T2;
+	}
+
 	private static void OnAtomRender(On.Editor.orig_method_927 orig, AtomType type, Vector2 position, float param_4582, float param_4583, float param_4584, float param_4585, float param_4586, float param_4587, Texture overrideShadow, Texture maskM, bool param_4590){
 		if(type == UShaking1 || type == UShaking1T2)
 			position += new Vector2((UraniumShakeCounter.Next(9) - 4) / 4f, (UraniumShakeCounter.Next(9) - 4) / 4f);
@@ -169,9 +178,7 @@ internal class UeAtoms {
 			cursor.Remove();
 			cursor.EmitDelegate<Func<Atom, AtomType>>(u => {
 				AtomType type = u.field_2275;
-				if(type == Uranium || type == UraniumT2
-				|| type == UShaking1 || type == UShaking1T2
-				|| type == UShaking2 || type == UShaking2T2)
+				if(IsUraniumState(type))
 					return Uranium;
 				return type;
 			});

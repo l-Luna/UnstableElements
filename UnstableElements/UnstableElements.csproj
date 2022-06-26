@@ -11,21 +11,51 @@
   <ItemGroup>
     <Reference Include="Lightning">
       <HintPath>..\..\..\ModdedLightning.exe</HintPath>
+      <CopyLocal>False</CopyLocal>
     </Reference>
     <Reference Include="MMHOOK_ModdedLightning">
       <HintPath>..\..\..\MMHOOK_ModdedLightning.dll</HintPath>
+      <CopyLocal>False</CopyLocal>
     </Reference>
     <Reference Include="Mono.Cecil">
       <HintPath>..\..\..\Mono.Cecil.dll</HintPath>
+      <CopyLocal>False</CopyLocal>
     </Reference>
     <Reference Include="MonoMod.RuntimeDetour">
       <HintPath>..\..\..\MonoMod.RuntimeDetour.dll</HintPath>
+      <CopyLocal>False</CopyLocal>
     </Reference>
     <Reference Include="MonoMod.Utils">
       <HintPath>..\..\..\MonoMod.Utils.dll</HintPath>
+      <CopyLocal>False</CopyLocal>
     </Reference>
     <Reference Include="YamlDotNet">
       <HintPath>..\..\..\YamlDotNet.dll</HintPath>
+      <CopyLocal>False</CopyLocal>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System">
+      <CopyLocal>False</CopyLocal>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.Core">
+      <CopyLocal>False</CopyLocal>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.Data">
+      <CopyLocal>False</CopyLocal>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.Drawing">
+      <CopyLocal>False</CopyLocal>
     </Reference>
   </ItemGroup>
 
