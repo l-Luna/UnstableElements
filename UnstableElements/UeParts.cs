@@ -17,7 +17,7 @@ using Texture = class_256;
 
 internal class UeParts{
 
-	public static PartType Irradiation, Volatility;
+	public static PartType Irradiation, Volatility, Tranquility;
 
     public static Texture IrradiationBase = class_235.method_615("textures/parts/leppa/UnstableElements/irradiation_base");
     public static Texture IrradiationGoldSymbol = class_235.method_615("textures/parts/leppa/UnstableElements/gold_symbol");
@@ -64,6 +64,23 @@ internal class UeParts{
             //CustomPermissionCheck = perms => perms.Contains("unstable-elements-volatility")
         };
 
+        Tranquility = new(){
+            field_1528 = "unstable-elements-tranquility", // ID
+            field_1529 = class_134.method_253("Glyph of Tranquility", string.Empty), // Name
+            field_1530 = class_134.method_253("The glyph of tranquility projects a field that stabilizes uranium and aether atoms, preventing their decays.", string.Empty), // Description
+            field_1531 = 40, // Cost
+            field_1539 = true, // Is a glyph (?)
+            field_1549 = class_238.field_1989.field_97.field_382, // Shadow/glow
+            field_1550 = class_238.field_1989.field_97.field_383, // Stroke/outline
+            field_1547 = class_235.method_615("textures/parts/icons/calcification"), // Panel icon
+            field_1548 = class_235.method_615("textures/parts/icons/calcification_hover"), // Hovered panel icon
+            field_1540 = new HexIndex[1]{
+              new HexIndex(0, 0)
+            }, // Spaces used
+            field_1551 = Permissions.None,
+            //CustomPermissionCheck = perms => perms.Contains("unstable-elements-tranquility")
+        };
+
         QApi.AddPartType(Irradiation, (part, pos, editor, renderer) => {
             Vector2 vector2 = new(83f, 119f);
             renderer.method_523(IrradiationBase, new Vector2(0.0f, -1f), vector2, 0.0f);
@@ -96,11 +113,13 @@ internal class UeParts{
             renderer.method_528(VolatilityBowl, new HexIndex(0, 0), Vector2.Zero);
             renderer.method_521(VolatilitySymbol, centre);
         });
+        QApi.AddPartType(Tranquility);
 
         QApi.AddPartTypeToPanel(Irradiation, PartTypes.field_1775);
         QApi.AddPartTypeToPanel(Volatility, PartTypes.field_1775);
         //QApi.AddPuzzlePermission("unstable-elements-irradiation", "Glyph of Irradiation");
         //QApi.AddPuzzlePermission("unstable-elements-volatility", "Glyph of Volatility");
+        //QApi.AddPuzzlePermission("unstable-elements-tranquility", "Glyph of Tranquility");
 
         QApi.RunAfterCycle((sim, first) => {
             // look for 3 unheld QSs and free gold
