@@ -55,8 +55,8 @@ internal class UeParts{
             field_1539 = true, // Is a glyph (?)
             field_1549 = class_238.field_1989.field_97.field_382, // Shadow/glow
             field_1550 = class_238.field_1989.field_97.field_383, // Stroke/outline
-            field_1547 = class_235.method_615("textures/parts/icons/calcification"), // Panel icon
-            field_1548 = class_235.method_615("textures/parts/icons/calcification_hover"), // Hovered panel icon
+            field_1547 = class_235.method_615("textures/parts/leppa/UnstableElements/volatility"), // Panel icon
+            field_1548 = class_235.method_615("textures/parts/leppa/UnstableElements/volatility_hovered"), // Hovered panel icon
             field_1540 = new HexIndex[1]{
               new HexIndex(0, 0)
             }, // Spaces used
