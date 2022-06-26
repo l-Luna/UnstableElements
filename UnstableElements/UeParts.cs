@@ -1,9 +1,11 @@
 ﻿using System.Linq;
+using System.Collections.Generic;
+using System.Reflection;
+
 using MonoMod.Utils;
 
-using System.Collections.Generic;
-
 using Quintessential;
+using MonoMod.RuntimeDetour;
 
 namespace UnstableElements;
 
@@ -30,8 +32,20 @@ internal class UeParts{
     public static Texture TranquilityQuicksilverSymbol = class_235.method_615("textures/parts/leppa/UnstableElements/quicksilver_symbol");
     public static Texture TranquilityMetalBowl = class_235.method_615("textures/parts/leppa/UnstableElements/tranquility_bowl");
     public static Texture TranquilityProjectors = class_235.method_615("textures/parts/leppa/UnstableElements/tranquility_projectors");
+    public static Texture TranquilityZoneHex = class_235.method_615("textures/parts/leppa/UnstableElements/tranquility_zone_hex");
+    public static Color TranquilityZoneColor = new(255 / 255f, 251 / 255f, 199 / 255f, 255 / 255f);
 
     private static readonly string TranquilityPowerId = "UnstableElements:tranquility_powered";
+    private static readonly HashSet<HexIndex> TranquilityOffsets = new(){
+        new(1, -1),
+        new(1, -2), new(2, -2),
+        new(1, -3), new(2, -3), new(3, -3),
+        new(1, -4), new(2, -4), new(3, -4), new(4, -4)
+    };
+
+    private static readonly HashSet<HexIndex> TranquilityHexes = new();
+
+    private static Hook TranquilityDrawFieldHook;
 
     public static void AddPartTypes(){
         Irradiation = new(){
@@ -144,8 +158,12 @@ internal class UeParts{
         //QApi.AddPuzzlePermission("unstable-elements-volatility", "Glyph of Volatility");
         //QApi.AddPuzzlePermission("unstable-elements-tranquility", "Glyph of Tranquility");
 
+        QApi.RunAfterCycle((_, _) => {
+            // first thing
+            TranquilityHexes.Clear();
+        });
+
         QApi.RunAfterCycle((sim, first) => {
-            // look for 3 unheld QSs and free gold
             var simData = new DynamicData(sim);
             var seb = simData.Get<SolutionEditorBase>("field_3818");
             var allParts = simData.Invoke<Solution>("method_1817").field_3919;
@@ -154,6 +172,7 @@ internal class UeParts{
             
             foreach(var part in allParts){
                 var type = part.method_1159();
+                // look for 3 unheld QSs and free gold
                 if(type == Irradiation){
                     // if all the atoms exist...
                     if(FindAtom(simData, part, new HexIndex(0, 0), partsAndGrippers).method_99(out AtomReference gold)
@@ -197,10 +216,25 @@ internal class UeParts{
                         if(UeAtoms.IsUraniumState(uranium.field_2280))
                             UeAtoms.DoUraniumDecay(uranium.field_2277, uranium.field_2279, uranium.field_2278, seb);
                 }else if(type == Tranquility){
-                    new DynamicData(part).Set(TranquilityPowerId, true);
+                    bool isPowered = 
+                        FindAtom(simData, part, new HexIndex(0, 1), partsAndGrippers).method_99(out AtomReference qs)
+                            && qs.field_2280 == AtomTypes.field_1680 // is QS
+                            && !qs.field_2281 && !qs.field_2282; // not consumed or held
+                    new DynamicData(part).Set(TranquilityPowerId, isPowered);
+					if(isPowered){
+						foreach(var offset in TranquilityOffsets){
+                            var adjusted = part.method_1184(offset);
+                            TranquilityHexes.Add(adjusted);
+						}
+					}
                 }
 			}
         });
+
+        /*TranquilityDrawFieldHook = new Hook(
+            typeof(SolutionEditorBase).GetMethod("method_1996", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance),
+            null
+        );*/
     }
 
     private static Maybe<AtomReference> FindAtom(DynamicData simData, Part self, HexIndex offset, List<Part> allParts) {
@@ -224,4 +258,6 @@ internal class UeParts{
         Matrix4 tf = Matrix4.method_1070((renderer.field_1797 + offset).ToVector3(0)) * Matrix4.method_1073(renderer.field_1798 + rotation) * Matrix4.method_1070(-size.ToVector3(0)) * Matrix4.method_1074(tex.field_2056.ToVector3(0));
         class_135.method_262(tex, c, tf);
     }
+
+    private delegate void orig_SEB_method_1996(SolutionEditorBase self, Part part, Vector2 pos);
 }
