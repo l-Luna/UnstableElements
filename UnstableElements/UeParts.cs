@@ -26,6 +26,11 @@ internal class UeParts{
     public static Texture VolatilitySymbol = class_235.method_615("textures/parts/leppa/UnstableElements/volatility_symbol");
     public static Texture VolatilityBowl = class_235.method_615("textures/parts/leppa/UnstableElements/volatility_bowl");
 
+    public static Texture TranquilityBase = class_235.method_615("textures/parts/leppa/UnstableElements/tranquility_base");
+    public static Texture TranquilityQuicksilverSymbol = class_235.method_615("textures/parts/leppa/UnstableElements/quicksilver_symbol");
+    public static Texture TranquilityMetalBowl = class_235.method_615("textures/parts/leppa/UnstableElements/tranquility_bowl");
+    public static Texture TranquilityProjectors = class_235.method_615("textures/parts/leppa/UnstableElements/tranquility_projectors");
+
     public static void AddPartTypes(){
         Irradiation = new(){
             field_1528 = "unstable-elements-irradiation", // ID
@@ -70,12 +75,14 @@ internal class UeParts{
             field_1530 = class_134.method_253("The glyph of tranquility projects a field that stabilizes uranium and aether atoms, preventing their decays.", string.Empty), // Description
             field_1531 = 40, // Cost
             field_1539 = true, // Is a glyph (?)
-            field_1549 = class_238.field_1989.field_97.field_382, // Shadow/glow
-            field_1550 = class_238.field_1989.field_97.field_383, // Stroke/outline
-            field_1547 = class_235.method_615("textures/parts/icons/calcification"), // Panel icon
-            field_1548 = class_235.method_615("textures/parts/icons/calcification_hover"), // Hovered panel icon
-            field_1540 = new HexIndex[1]{
-              new HexIndex(0, 0)
+            field_1549 = class_238.field_1989.field_97.field_386, // Shadow/glow
+            field_1550 = class_238.field_1989.field_97.field_387, // Stroke/outline
+            field_1547 = class_235.method_615("textures/parts/leppa/UnstableElements/tranquility"), // Panel icon
+            field_1548 = class_235.method_615("textures/parts/leppa/UnstableElements/tranquility_hovered"), // Hovered panel icon
+            field_1540 = new HexIndex[3]{
+              new HexIndex(0, 0),
+              new HexIndex(1, 0),
+              new HexIndex(0, 1)
             }, // Spaces used
             field_1551 = Permissions.None,
             //CustomPermissionCheck = perms => perms.Contains("unstable-elements-tranquility")
@@ -113,10 +120,18 @@ internal class UeParts{
             renderer.method_528(VolatilityBowl, new HexIndex(0, 0), Vector2.Zero);
             renderer.method_521(VolatilitySymbol, centre);
         });
-        QApi.AddPartType(Tranquility);
+        QApi.AddPartType(Tranquility, (part, pos, editor, renderer) => {
+            Vector2 vector2 = new(42, 48);
+            renderer.method_523(TranquilityBase, new Vector2(-1, -1), vector2, 0);
+            HexIndex qsSite = new(0, 1);
+            renderer.method_530(class_238.field_1989.field_90.field_164 /*bonder_shadow*/, qsSite, 0);
+            renderer.method_528(TranquilityMetalBowl, qsSite, Vector2.Zero);
+            renderer.method_529(TranquilityQuicksilverSymbol, qsSite, Vector2.Zero);
+        });
 
         QApi.AddPartTypeToPanel(Irradiation, PartTypes.field_1775);
         QApi.AddPartTypeToPanel(Volatility, PartTypes.field_1775);
+        QApi.AddPartTypeToPanel(Tranquility, PartTypes.field_1775);
         //QApi.AddPuzzlePermission("unstable-elements-irradiation", "Glyph of Irradiation");
         //QApi.AddPuzzlePermission("unstable-elements-volatility", "Glyph of Volatility");
         //QApi.AddPuzzlePermission("unstable-elements-tranquility", "Glyph of Tranquility");
