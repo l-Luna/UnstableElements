@@ -14,6 +14,7 @@ public class UnstableElements : QuintessentialMod{
 
 	public override void Unload() {
 		UeAtoms.Unload();
+		UeParts.Unload();
 	}
 
 	public override void LoadPuzzleContent() {

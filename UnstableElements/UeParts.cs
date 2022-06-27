@@ -1,11 +1,12 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
-using System.Reflection;
 
 using MonoMod.Utils;
 
 using Quintessential;
 using MonoMod.RuntimeDetour;
+using System.Reflection;
+using System.Data;
 
 namespace UnstableElements;
 
@@ -43,9 +44,7 @@ internal class UeParts{
         new(1, -4), new(2, -4), new(3, -4), new(4, -4)
     };
 
-    private static readonly HashSet<HexIndex> TranquilityHexes = new();
-
-    private static Hook TranquilityDrawFieldHook;
+    public static readonly HashSet<HexIndex> TranquilityHexes = new();
 
     public static void AddPartTypes(){
         Irradiation = new(){
@@ -143,10 +142,12 @@ internal class UeParts{
             renderer.method_530(class_238.field_1989.field_90.field_164 /*bonder_shadow*/, qsSite, 0);
             renderer.method_528(TranquilityMetalBowl, qsSite, Vector2.Zero);
             renderer.method_529(TranquilityQuicksilverSymbol, qsSite, Vector2.Zero);
-            if(editor.method_503() != enum_128.Stopped && new DynamicData(part).TryGet(TranquilityPowerId, out bool? power) && power == true) {
-				double time = System.Math.Sin(new struct_27(Time.Now().Ticks).method_603());
+			
+            double time = System.Math.Sin(new struct_27(Time.Now().Ticks).method_603());
+            float pulse = (float)(time / 3 + .66);
+            if(editor.method_503() != enum_128.Stopped && new DynamicData(part).TryGet(TranquilityPowerId, out bool? power) && power == true){
                 Color tint = Color.White;
-                tint.A *= (float)(time / 3 + .66);
+                tint.A *= pulse;
                 DrawForPartWithTint(renderer, TranquilityProjectors, new Vector2(-1, -1), vector2, 0, tint);
 			}
 		});
@@ -231,10 +232,11 @@ internal class UeParts{
 			}
         });
 
-        /*TranquilityDrawFieldHook = new Hook(
-            typeof(SolutionEditorBase).GetMethod("method_1996", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance),
-            null
-        );*/
+		On.SolutionEditorBase.method_1984 += DrawTranquilityField;
+    }
+
+	public static void Unload(){
+        On.SolutionEditorBase.method_1984 -= DrawTranquilityField;
     }
 
     private static Maybe<AtomReference> FindAtom(DynamicData simData, Part self, HexIndex offset, List<Part> allParts) {
@@ -259,5 +261,21 @@ internal class UeParts{
         class_135.method_262(tex, c, tf);
     }
 
-    private delegate void orig_SEB_method_1996(SolutionEditorBase self, Part part, Vector2 pos);
+    private static void DrawTranquilityField(On.SolutionEditorBase.orig_method_1984 orig, SolutionEditorBase self, Vector2 param_5533, Bounds2 param_5534, Bounds2 param_5535, bool param_5536, Maybe<List<Molecule>> param_5537, bool param_5538) {
+        orig(self, param_5533, param_5534, param_5535, param_5536, param_5537, param_5538);
+
+		if(self.method_503() != enum_128.Stopped) {
+            double time = System.Math.Sin(new struct_27(Time.Now().Ticks).method_603());
+            float pulse = (float)(time / 4 + .75) / 2.4f;
+
+            Color tint = TranquilityZoneColor;
+            class_187 conv = class_187.field_1742;
+            tint.A *= pulse;
+            foreach(var hex in TranquilityHexes){
+                Vector2 hexAsVec = conv.method_492(hex) + param_5533 - new Vector2(2, 8);
+                Matrix4 tf = Matrix4.method_1070(hexAsVec.ToVector3(0)) * Matrix4.method_1073(0) * Matrix4.method_1070(new Vector3(-40, -40, 0)) * Matrix4.method_1074(TranquilityZoneHex.field_2056.ToVector3(0));
+                class_135.method_262(TranquilityZoneHex, tint, tf);
+            }
+        }
+    }
 }
