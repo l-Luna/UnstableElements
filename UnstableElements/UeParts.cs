@@ -217,10 +217,9 @@ internal class UeParts{
                         if(UeAtoms.IsUraniumState(uranium.field_2280))
                             UeAtoms.DoUraniumDecay(uranium.field_2277, uranium.field_2279, uranium.field_2278, seb);
                 }else if(type == Tranquility){
-                    bool isPowered = 
+                    bool isPowered =
                         FindAtom(simData, part, new HexIndex(0, 1), partsAndGrippers).method_99(out AtomReference qs)
-                            && qs.field_2280 == AtomTypes.field_1680 // is QS
-                            && !qs.field_2281 && !qs.field_2282; // not consumed or held
+                            && qs.field_2280 == AtomTypes.field_1680; // is QS
                     new DynamicData(part).Set(TranquilityPowerId, isPowered);
 					if(isPowered){
 						foreach(var offset in TranquilityOffsets){
