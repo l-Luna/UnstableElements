@@ -132,10 +132,12 @@ internal class UeAtoms {
 				foreach(var molecule in molecules) {
 					foreach(var atom in molecule.method_1100()){
 						var type = atom.Value.field_2275;
-						if(Heating.ContainsKey(type)){
-							atom.Value.field_2275 = Heating[type];
-						}else if(type == UShaking2T2){
-							DoUraniumDecay(molecule, atom.Value, atom.Key, seb);
+						if(!UeParts.TranquilityHexes.Contains(atom.Key)){
+							if(Heating.ContainsKey(type)){
+								atom.Value.field_2275 = Heating[type];
+							} else if(type == UShaking2T2){
+								DoUraniumDecay(molecule, atom.Value, atom.Key, seb);
+							}
 						}
 					}
 				}
