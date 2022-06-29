@@ -202,7 +202,16 @@ internal class UeParts{
             renderer.method_529(SublimationQuintessenceSymbol, new(0, 0), new(3, 3));
 			if(myState.field_2743) // disappearing quintessence for active glyph
                 Editor.method_925(Molecule.method_1121(AtomTypes.field_1690), RelativeToGlobal(renderInfo, new(0, 0)), new(0, 0), 0.0f, 1f, 1f - editor.method_504(), 1f, false, null);
-            
+
+            Molecule stabilizedAether = new();
+            stabilizedAether.method_1105(new Atom(UeAtoms.Aether), new(1, 1));
+            stabilizedAether.method_1105(new Atom(AtomTypes.field_1675), new(0, 1));
+            stabilizedAether.method_1112(enum_126.Standard, new(0, 1), new(1, 1), struct_18.field_1431);
+            Molecule stbAetherRot = new();
+            stbAetherRot.method_1105(new Atom(UeAtoms.Aether), new(-1, -1));
+            stbAetherRot.method_1105(new Atom(AtomTypes.field_1675), new(0, -1));
+            stbAetherRot.method_1112(enum_126.Standard, new(0, -1), new(-1, -1), struct_18.field_1431);
+
             // irises
             int animIdx = 15;
             float prog = 0;
@@ -211,20 +220,16 @@ internal class UeParts{
                 prog = editor.method_504();
             }
             if(prog < 0.5){ // render under irises
-				Editor.method_925(Molecule.method_1121(AtomTypes.field_1675), RelativeToGlobal(renderInfo, new(0, 1)), new(0, 0), 0.0f, 1f, prog, 1f, false, null);
-                Editor.method_925(Molecule.method_1121(AtomTypes.field_1675), RelativeToGlobal(renderInfo, new(0, -1)), new(0, 0), 0.0f, 1f, prog, 1f, false, null);
-                Editor.method_925(Molecule.method_1121(UeAtoms.Aether), RelativeToGlobal(renderInfo, new(1, 1)), new(0, 0), 0.0f, 1f, prog, 1f, false, null);
-                Editor.method_925(Molecule.method_1121(UeAtoms.Aether), RelativeToGlobal(renderInfo, new(-1, -1)), new(0, 0), 0.0f, 1f, prog, 1f, false, null);
+				Editor.method_925(stabilizedAether, RelativeToGlobal(renderInfo, new(0, 0)), new(0, 0), 0.0f, 1f, prog, 1f, false, null);
+                Editor.method_925(stbAetherRot, RelativeToGlobal(renderInfo, new(0, 0)), new(0, 0), 0.0f, 1f, prog, 1f, false, null);
             }
             renderer.method_529(SublimationSaltIris[animIdx], new(0, 1), new(2, 0));
             renderer.method_529(SublimationSaltIris[animIdx], new(0, -1), new(2, 0));
             renderer.method_529(SublimationAetherIris[animIdx], new(1, 1), new(2, 0));
             renderer.method_529(SublimationAetherIris[animIdx], new(-1, -1), new(2, 0));
 			if(prog > 0.5){ // render over irises
-                Editor.method_925(Molecule.method_1121(AtomTypes.field_1675), RelativeToGlobal(renderInfo, new(0, 1)), new(0, 0), 0.0f, 1f, prog, 1f, false, null);
-                Editor.method_925(Molecule.method_1121(AtomTypes.field_1675), RelativeToGlobal(renderInfo, new(0, -1)), new(0, 0), 0.0f, 1f, prog, 1f, false, null);
-                Editor.method_925(Molecule.method_1121(UeAtoms.Aether), RelativeToGlobal(renderInfo, new(1, 1)), new(0, 0), 0.0f, 1f, prog, 1f, false, null);
-                Editor.method_925(Molecule.method_1121(UeAtoms.Aether), RelativeToGlobal(renderInfo, new(-1, -1)), new(0, 0), 0.0f, 1f, prog, 1f, false, null);
+                Editor.method_925(stabilizedAether, RelativeToGlobal(renderInfo, new(0, 0)), new(0, 0), 0.0f, 1f, prog, 1f, false, null);
+                Editor.method_925(stbAetherRot, RelativeToGlobal(renderInfo, new(0, 0)), new(0, 0), 0.0f, 1f, prog, 1f, false, null);
             }
 
             // top
