@@ -20,6 +20,8 @@ using Texture = class_256;
 
 internal class UeParts{
 
+    // TODO: move FindAtom and HeldGrippers to Quintessential
+
 	public static PartType Irradiation, Volatility, Tranquility;
 
     public static Texture IrradiationBase = class_235.method_615("textures/parts/leppa/UnstableElements/irradiation_base");
@@ -36,6 +38,8 @@ internal class UeParts{
     public static Texture TranquilityZoneHex = class_235.method_615("textures/parts/leppa/UnstableElements/tranquility_zone_hex");
     public static Color TranquilityZoneColor = new(255 / 255f, 251 / 255f, 199 / 255f, 255 / 255f);
 
+    public static readonly HashSet<HexIndex> TranquilityHexes = new();
+
     private static readonly string TranquilityPowerId = "UnstableElements:tranquility_powered";
     private static readonly HashSet<HexIndex> TranquilityOffsets = new(){
         new(1, -1),
@@ -44,7 +48,9 @@ internal class UeParts{
         new(1, -4), new(2, -4), new(3, -4), new(4, -4)
     };
 
-    public static readonly HashSet<HexIndex> TranquilityHexes = new();
+    // these get reset at the start of a cycle after being collected by vanilla
+    private static List<Part> HeldGrippers;
+    private static Hook FindHeldGrippersHook;
 
     public static void AddPartTypes(){
         Irradiation = new(){
@@ -168,18 +174,16 @@ internal class UeParts{
             var simData = new DynamicData(sim);
             var seb = simData.Get<SolutionEditorBase>("field_3818");
             var allParts = simData.Invoke<Solution>("method_1817").field_3919;
-            var partsAndGrippers = new List<Part>(allParts);
-            partsAndGrippers.AddRange(allParts.SelectMany(u => u.field_2696));
             
             foreach(var part in allParts){
                 var type = part.method_1159();
                 // look for 3 unheld QSs and free gold
                 if(type == Irradiation){
                     // if all the atoms exist...
-                    if(FindAtom(simData, part, new HexIndex(0, 0), partsAndGrippers).method_99(out AtomReference gold)
-                    && FindAtom(simData, part, new HexIndex(-1, 1), partsAndGrippers).method_99(out AtomReference qs1)
-                    && FindAtom(simData, part, new HexIndex(1, 0), partsAndGrippers).method_99(out AtomReference qs2)
-                    && FindAtom(simData, part, new HexIndex(0, -1), partsAndGrippers).method_99(out AtomReference qs3)){
+                    if(FindAtom(simData, part, new HexIndex(0, 0), HeldGrippers).method_99(out AtomReference gold)
+                    && FindAtom(simData, part, new HexIndex(-1, 1), HeldGrippers).method_99(out AtomReference qs1)
+                    && FindAtom(simData, part, new HexIndex(1, 0), HeldGrippers).method_99(out AtomReference qs2)
+                    && FindAtom(simData, part, new HexIndex(0, -1), HeldGrippers).method_99(out AtomReference qs3)){
                         // and are the right types...
                         if(gold.field_2280 == AtomTypes.field_1686
                         && qs1.field_2280 == AtomTypes.field_1680
@@ -213,12 +217,12 @@ internal class UeParts{
                         }
                     }
                 }else if(type == Volatility){
-                    if(FindAtom(simData, part, new HexIndex(0, 0), partsAndGrippers).method_99(out AtomReference uranium))
+                    if(FindAtom(simData, part, new HexIndex(0, 0), HeldGrippers).method_99(out AtomReference uranium))
                         if(UeAtoms.IsUraniumState(uranium.field_2280))
                             UeAtoms.DoUraniumDecay(uranium.field_2277, uranium.field_2279, uranium.field_2278, seb);
                 }else if(type == Tranquility){
                     bool isPowered =
-                        FindAtom(simData, part, new HexIndex(0, 1), partsAndGrippers).method_99(out AtomReference qs)
+                        FindAtom(simData, part, new HexIndex(0, 1), HeldGrippers).method_99(out AtomReference qs)
                             && qs.field_2280 == AtomTypes.field_1680; // is QS
                     new DynamicData(part).Set(TranquilityPowerId, isPowered);
 					if(isPowered){
@@ -231,20 +235,28 @@ internal class UeParts{
 			}
         });
 
+        FindHeldGrippersHook = new(
+            typeof(Sim).GetMethod("method_1832", BindingFlags.NonPublic | BindingFlags.Instance),
+            FindHeldGrippers
+        );
+
 		On.SolutionEditorBase.method_1984 += DrawTranquilityField;
     }
 
 	public static void Unload(){
+        FindHeldGrippersHook.Dispose();
+
         On.SolutionEditorBase.method_1984 -= DrawTranquilityField;
     }
 
-    private static Maybe<AtomReference> FindAtom(DynamicData simData, Part self, HexIndex offset, List<Part> allParts) {
+    private static Maybe<AtomReference> FindAtom(DynamicData simData, Part self, HexIndex offset, List<Part> allParts){
         HexIndex position = self.method_1184(offset);
+        var simStates = simData.Get<Dictionary<Part, PartSimState>>("field_3821");
         foreach(Molecule molecule in simData.Get<List<Molecule>>("field_3823")){
             if(molecule.method_1100().TryGetValue(position, out Atom atom)){
                 bool flag = false;
                 foreach(Part part in allParts){
-                    if(simData.Get<Dictionary<Part, PartSimState>>("field_3821")[part].field_2724 == position){
+                    if(simStates[part].field_2724 == position){
                         flag = true;
                         break;
                     }
@@ -263,7 +275,7 @@ internal class UeParts{
     private static void DrawTranquilityField(On.SolutionEditorBase.orig_method_1984 orig, SolutionEditorBase self, Vector2 param_5533, Bounds2 param_5534, Bounds2 param_5535, bool param_5536, Maybe<List<Molecule>> param_5537, bool param_5538) {
         orig(self, param_5533, param_5534, param_5535, param_5536, param_5537, param_5538);
 
-		if(self.method_503() != enum_128.Stopped) {
+		if(self.method_503() != enum_128.Stopped){
             double time = System.Math.Sin(new struct_27(Time.Now().Ticks).method_603());
             float pulse = (float)(time / 4 + .75) / 2.4f;
 
@@ -276,5 +288,20 @@ internal class UeParts{
                 class_135.method_262(TranquilityZoneHex, tint, tf);
             }
         }
+    }
+
+    private delegate void orig_method_1832(Sim self, bool first);
+    private static void FindHeldGrippers(orig_method_1832 orig, Sim self, bool first){
+        var simData = new DynamicData(self);
+        var allParts = simData.Invoke<Solution>("method_1817").field_3919;
+        var simStates = simData.Get<Dictionary<Part, PartSimState>>("field_3821");
+
+        HeldGrippers = new();
+		foreach(var part in allParts)
+			foreach(var gripper in part.field_2696)
+				if(simStates[gripper].field_2729.method_1085())
+                    HeldGrippers.Add(gripper);
+
+        orig(self, first);
     }
 }
