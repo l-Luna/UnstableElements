@@ -22,7 +22,7 @@ internal class UeParts{
 
     // TODO: move FindAtom and HeldGrippers to Quintessential
 
-	public static PartType Irradiation, Volatility, Tranquility;
+	public static PartType Irradiation, Volatility, Tranquility, Sublimation;
 
     public static Texture IrradiationBase = class_235.method_615("textures/parts/leppa/UnstableElements/irradiation_base");
     public static Texture IrradiationGoldSymbol = class_235.method_615("textures/parts/leppa/UnstableElements/gold_symbol");
@@ -37,6 +37,12 @@ internal class UeParts{
     public static Texture TranquilityProjectors = class_235.method_615("textures/parts/leppa/UnstableElements/tranquility_projectors");
     public static Texture TranquilityZoneHex = class_235.method_615("textures/parts/leppa/UnstableElements/tranquility_zone_hex");
     public static Color TranquilityZoneColor = new(255 / 255f, 251 / 255f, 199 / 255f, 255 / 255f);
+
+    public static Texture SublimationBelowIris = class_235.method_615("textures/parts/leppa/UnstableElements/sublimation_below_iris");
+    public static Texture SublimationAboveIris = class_235.method_615("textures/parts/leppa/UnstableElements/sublimation_above_iris");
+    public static Texture SublimationQuintessenceSymbol = class_235.method_615("textures/parts/leppa/UnstableElements/quintessence_symbol");
+    public static Texture[] SublimationAetherIris = new Texture[16];
+    public static Texture[] SublimationSaltIris = new Texture[16];
 
     public static readonly HashSet<HexIndex> TranquilityHexes = new();
 
@@ -53,6 +59,11 @@ internal class UeParts{
     private static Hook FindHeldGrippersHook;
 
     public static void AddPartTypes(){
+		for(int i = 0; i < 16; i++) {
+            SublimationAetherIris[i] = class_235.method_615($"textures/parts/leppa/UnstableElements/iris_full_aether.array/iris_full_00{i + 1 :D2}");
+            SublimationSaltIris[i] = class_235.method_615($"textures/parts/leppa/UnstableElements/iris_full_salt.array/iris_full_00{i + 1:D2}");
+        }
+
         Irradiation = new(){
             field_1528 = "unstable-elements-irradiation", // ID
             field_1529 = class_134.method_253("Glyph of Irradiation", string.Empty), // Name
@@ -109,6 +120,27 @@ internal class UeParts{
             //CustomPermissionCheck = perms => perms.Contains("unstable-elements-tranquility")
         };
 
+        Sublimation = new(){
+            field_1528 = "unstable-elements-sublimation", // ID
+            field_1529 = class_134.method_253("Glyph of Sublimation", string.Empty), // Name
+            field_1530 = class_134.method_253("The glyph of sublimation splits an atom of quintessence into two molecules of stabilized aether.", string.Empty), // Description
+            field_1531 = 10, // Cost
+            field_1539 = true, // Is a glyph (?)
+            field_1549 = class_235.method_615("textures/parts/leppa/UnstableElements/sublimation_glow"), // Shadow/glow
+            field_1550 = class_235.method_615("textures/parts/leppa/UnstableElements/sublimation_stroke"), // Stroke/outline
+            field_1547 = class_235.method_615("textures/parts/leppa/UnstableElements/sublimation"), // Panel icon
+            field_1548 = class_235.method_615("textures/parts/leppa/UnstableElements/sublimation_hovered"), // Hovered panel icon
+            field_1540 = new HexIndex[5]{
+              new HexIndex(0, 0),
+              new HexIndex(0, 1),
+              new HexIndex(1, 1),
+              new HexIndex(0, -1),
+              new HexIndex(-1, -1)
+            }, // Spaces used
+            field_1551 = Permissions.None,
+            //CustomPermissionCheck = perms => perms.Contains("unstable-elements-sublimation")
+        };
+
         QApi.AddPartType(Irradiation, (part, pos, editor, renderer) => {
             Vector2 vector2 = new(83f, 119f);
             renderer.method_523(IrradiationBase, new Vector2(0.0f, -1f), vector2, 0.0f);
@@ -157,13 +189,28 @@ internal class UeParts{
                 DrawForPartWithTint(renderer, TranquilityProjectors, new Vector2(-1, -1), vector2, 0, tint);
 			}
 		});
+        QApi.AddPartType(Sublimation, (part, pos, editor, renderer) => {
+            Vector2 vector2 = new(330 / 2, 238 / 2);
+            renderer.method_523(SublimationBelowIris, new Vector2(-1, -1), vector2, 0);
+            renderer.method_523(SublimationAboveIris, new Vector2(-1, -1), vector2, 0);
+            // centre hex
+            renderer.method_529(SublimationQuintessenceSymbol, new(0, 0), new(3, 3));
+            // salt irises
+            renderer.method_529(SublimationSaltIris[15], new(0, 1), new(2, 0));
+            renderer.method_529(SublimationSaltIris[15], new(0, -1), new(2, 0));
+            // aether irises
+            renderer.method_529(SublimationAetherIris[15], new(1, 1), new(2, 0));
+            renderer.method_529(SublimationAetherIris[15], new(-1, -1), new(2, 0));
+        });
 
         QApi.AddPartTypeToPanel(Irradiation, PartTypes.field_1775);
         QApi.AddPartTypeToPanel(Volatility, PartTypes.field_1775);
         QApi.AddPartTypeToPanel(Tranquility, PartTypes.field_1775);
+        QApi.AddPartTypeToPanel(Sublimation, PartTypes.field_1775);
         //QApi.AddPuzzlePermission("unstable-elements-irradiation", "Glyph of Irradiation");
         //QApi.AddPuzzlePermission("unstable-elements-volatility", "Glyph of Volatility");
         //QApi.AddPuzzlePermission("unstable-elements-tranquility", "Glyph of Tranquility");
+        //QApi.AddPuzzlePermission("unstable-elements-sublimation", "Glyph of Sublimation");
 
         QApi.RunAfterCycle((_, _) => {
             // first thing
@@ -174,7 +221,8 @@ internal class UeParts{
             var simData = new DynamicData(sim);
             var seb = simData.Get<SolutionEditorBase>("field_3818");
             var allParts = simData.Invoke<Solution>("method_1817").field_3919;
-            
+            var simStates = simData.Get<Dictionary<Part, PartSimState>>("field_3821");
+
             foreach(var part in allParts){
                 var type = part.method_1159();
                 // look for 3 unheld QSs and free gold
@@ -231,8 +279,64 @@ internal class UeParts{
                             TranquilityHexes.Add(adjusted);
 						}
 					}
+                }else if(type == Sublimation){
+                    var mySimState = simStates[part];
+                    // if we're in the accepting phase...
+                    if(!mySimState.field_2743){
+                        // if we have an unheld unbonded quintessence at the centre...
+                        if(FindAtom(simData, part, new(0, 0), HeldGrippers).method_99(out AtomReference quint)
+                            && quint.field_2280 == AtomTypes.field_1690
+                            && !quint.field_2281 && !quint.field_2282){
+                            // and no atoms are blocking our outputs...
+                            if(!FindAtom(simData, part, new(1, 0), HeldGrippers).method_1085()
+                                && !FindAtom(simData, part, new(1, 1), HeldGrippers).method_1085()
+                                && !FindAtom(simData, part, new(0, -1), HeldGrippers).method_1085()
+                                && !FindAtom(simData, part, new(-1, -1), HeldGrippers).method_1085()){
+                                // destroy the quintessence
+                                quint.field_2277.method_1107(quint.field_2278);
+                                // set this part to be inactive the rest of the cycle
+                                mySimState.field_2743 = true;
+                                // play the production sound
+                                class_238.field_1991.field_1841.method_28(seb.method_506());
+                                // mark output positions as collidable
+                                HexIndex[] outputs = new HexIndex[4]{
+                                    new HexIndex(0, 1),
+                                    new HexIndex(1, 1),
+                                    new HexIndex(0, -1),
+                                    new HexIndex(-1, -1)
+                                };
+                                var collisions = simData.Get<List<Sim.struct_122>>("field_3826");
+								foreach(var hex in outputs){
+                                    Vector2 vector2 = class_187.field_1742.method_491(part.method_1184(hex), Vector2.Zero);
+                                    List<Sim.struct_122> field3826 = simData.Get<List<Sim.struct_122>>("field_3826");
+                                    Sim.struct_122 collision = new(){
+                                        field_3850 = 0,
+                                        field_3851 = vector2,
+                                        field_3852 = simData.Get<float>("field_3832")
+                                    };
+                                    collisions.Add(collision);
+                                }
+                            }
+                        }
+                    }else{
+                        // otherwise, we're in the producing phase
+                        Molecule stabilizedAether = new();
+                        stabilizedAether.method_1105(new Atom(UeAtoms.Aether), part.method_1184(new HexIndex(1, 1)));
+                        stabilizedAether.method_1105(new Atom(AtomTypes.field_1675), part.method_1184(new HexIndex(0, 1)));
+                        stabilizedAether.method_1112(enum_126.Standard, part.method_1184(new HexIndex(0, 1)), part.method_1184(new HexIndex(1, 1)), struct_18.field_1431);
+                        Molecule stbAetherRot = new();
+                        stbAetherRot.method_1105(new Atom(UeAtoms.Aether), part.method_1184(new HexIndex(-1, -1)));
+                        stbAetherRot.method_1105(new Atom(AtomTypes.field_1675), part.method_1184(new HexIndex(0, -1)));
+                        stbAetherRot.method_1112(enum_126.Standard, part.method_1184(new HexIndex(0, -1)), part.method_1184(new HexIndex(-1, -1)), struct_18.field_1431);
+
+                        var molecules = simData.Get<List<Molecule>>("field_3823");
+                        molecules.Add(stabilizedAether);
+                        molecules.Add(stbAetherRot);
+
+                        mySimState.field_2743 = false;
+                    }
                 }
-			}
+            }
         });
 
         FindHeldGrippersHook = new(
