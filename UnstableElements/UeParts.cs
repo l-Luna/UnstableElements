@@ -408,8 +408,11 @@ internal class UeParts{
         orig(self, param_5533, param_5534, param_5535, param_5536, param_5537, param_5538);
 
 		if(self.method_503() != enum_128.Stopped){
-            double time = System.Math.Sin(new struct_27(Time.Now().Ticks).method_603());
+            double time = Math.Sin(new struct_27(Time.Now().Ticks).method_603());
             float pulse = (float)(time / 4 + .75) / 2.4f;
+
+			if(self is class_194)
+                pulse = 0.25f; // constant brightness in GIFs
 
             Color tint = TranquilityZoneColor;
             class_187 conv = class_187.field_1742;
