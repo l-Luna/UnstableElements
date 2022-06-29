@@ -100,21 +100,22 @@ internal class UeAtoms {
 
 		// Aether self-destruction
 		QApi.RunAfterCycle((sim, first) => {
-			if(!first) {
-				List<Molecule> toRemove = new List<Molecule>();
-				var molecules = new DynamicData(sim).Get<List<Molecule>>("field_3823");
-				foreach(var molecule in molecules) {
+			if(!first){
+				List<Molecule> toRemove = new();
+				List<Molecule> molecules = new DynamicData(sim).Get<List<Molecule>>("field_3823");
+				foreach(var molecule in molecules){
 					bool hasAether = false, hasNonAether = false;
 					foreach(var atom in molecule.method_1100())
-						if(atom.Value.field_2275.Equals(Aether))
-							hasAether = true;
-						else
+						if(atom.Value.field_2275.Equals(Aether)){
+							if(!UeParts.TranquilityHexes.Contains(atom.Key))
+								hasAether = true;
+						}else
 							hasNonAether = true;
 					if(hasAether && !hasNonAether)
 						toRemove.Add(molecule);
 				}
-				foreach(var it in toRemove) {
-					foreach(var atom in it.method_1100()) {
+				foreach(var it in toRemove){
+					foreach(var atom in it.method_1100()){
 						var seb = new DynamicData(sim).Get<SolutionEditorBase>("field_3818");
 						seb.field_3936.Add(new class_228(seb, (enum_7)1, class_187.field_1742.method_492(atom.Key) + new Vector2(80f, 0.0f), class_238.field_1989.field_90.field_240 /* or 42? */, 30f, Vector2.Zero, 0.0f));
 					}
@@ -125,7 +126,7 @@ internal class UeAtoms {
 
 		// Uranium heating
 		QApi.RunAfterCycle((sim, first) => {
-			if(!first) {
+			if(!first){
 				var simData = new DynamicData(sim);
 				var seb = simData.Get<SolutionEditorBase>("field_3818");
 				var molecules = simData.Get<List<Molecule>>("field_3823");
@@ -135,7 +136,7 @@ internal class UeAtoms {
 						if(!UeParts.TranquilityHexes.Contains(atom.Key)){
 							if(Heating.ContainsKey(type)){
 								atom.Value.field_2275 = Heating[type];
-							} else if(type == UShaking2T2){
+							}else if(type == UShaking2T2){
 								DoUraniumDecay(molecule, atom.Value, atom.Key, seb);
 							}
 						}
