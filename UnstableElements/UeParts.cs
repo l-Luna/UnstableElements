@@ -7,6 +7,7 @@ using Quintessential;
 using MonoMod.RuntimeDetour;
 using System.Reflection;
 using System.Data;
+using System;
 
 namespace UnstableElements;
 
@@ -190,17 +191,44 @@ internal class UeParts{
 			}
 		});
         QApi.AddPartType(Sublimation, (part, pos, editor, renderer) => {
+            PartSimState myState = editor.method_507().method_481(part);
             Vector2 vector2 = new(330 / 2, 238 / 2);
+            var renderInfo = editor.method_1989(part, pos);
+
+            // base
             renderer.method_523(SublimationBelowIris, new Vector2(-1, -1), vector2, 0);
-            renderer.method_523(SublimationAboveIris, new Vector2(-1, -1), vector2, 0);
+
             // centre hex
             renderer.method_529(SublimationQuintessenceSymbol, new(0, 0), new(3, 3));
-            // salt irises
-            renderer.method_529(SublimationSaltIris[15], new(0, 1), new(2, 0));
-            renderer.method_529(SublimationSaltIris[15], new(0, -1), new(2, 0));
-            // aether irises
-            renderer.method_529(SublimationAetherIris[15], new(1, 1), new(2, 0));
-            renderer.method_529(SublimationAetherIris[15], new(-1, -1), new(2, 0));
+			if(myState.field_2743) // disappearing quintessence for active glyph
+                Editor.method_925(Molecule.method_1121(AtomTypes.field_1690), RelativeToGlobal(renderInfo, new(0, 0)), new(0, 0), 0.0f, 1f, 1f - editor.method_504(), 1f, false, null);
+            
+            // irises
+            int animIdx = 15;
+            float prog = 0;
+			if(myState.field_2743){
+                animIdx = class_162.method_404((int)((double)class_162.method_411(1f, -1f, editor.method_504()) * 16), 0, 15);
+                prog = editor.method_504();
+            }
+            if(prog < 0.5){ // render under irises
+				Editor.method_925(Molecule.method_1121(AtomTypes.field_1675), RelativeToGlobal(renderInfo, new(0, 1)), new(0, 0), 0.0f, 1f, prog, 1f, false, null);
+                Editor.method_925(Molecule.method_1121(AtomTypes.field_1675), RelativeToGlobal(renderInfo, new(0, -1)), new(0, 0), 0.0f, 1f, prog, 1f, false, null);
+                Editor.method_925(Molecule.method_1121(UeAtoms.Aether), RelativeToGlobal(renderInfo, new(1, 1)), new(0, 0), 0.0f, 1f, prog, 1f, false, null);
+                Editor.method_925(Molecule.method_1121(UeAtoms.Aether), RelativeToGlobal(renderInfo, new(-1, -1)), new(0, 0), 0.0f, 1f, prog, 1f, false, null);
+            }
+            renderer.method_529(SublimationSaltIris[animIdx], new(0, 1), new(2, 0));
+            renderer.method_529(SublimationSaltIris[animIdx], new(0, -1), new(2, 0));
+            renderer.method_529(SublimationAetherIris[animIdx], new(1, 1), new(2, 0));
+            renderer.method_529(SublimationAetherIris[animIdx], new(-1, -1), new(2, 0));
+			if(prog > 0.5){ // render over irises
+                Editor.method_925(Molecule.method_1121(AtomTypes.field_1675), RelativeToGlobal(renderInfo, new(0, 1)), new(0, 0), 0.0f, 1f, prog, 1f, false, null);
+                Editor.method_925(Molecule.method_1121(AtomTypes.field_1675), RelativeToGlobal(renderInfo, new(0, -1)), new(0, 0), 0.0f, 1f, prog, 1f, false, null);
+                Editor.method_925(Molecule.method_1121(UeAtoms.Aether), RelativeToGlobal(renderInfo, new(1, 1)), new(0, 0), 0.0f, 1f, prog, 1f, false, null);
+                Editor.method_925(Molecule.method_1121(UeAtoms.Aether), RelativeToGlobal(renderInfo, new(-1, -1)), new(0, 0), 0.0f, 1f, prog, 1f, false, null);
+            }
+
+            // top
+            renderer.method_523(SublimationAboveIris, new Vector2(-1, -1), vector2, 0);
         });
 
         QApi.AddPartTypeToPanel(Irradiation, PartTypes.field_1775);
@@ -407,5 +435,9 @@ internal class UeParts{
                     HeldGrippers.Add(gripper);
 
         orig(self, first);
+    }
+
+    private static Vector2 RelativeToGlobal(class_236 partRenderInfo, HexIndex pos){
+        return partRenderInfo.field_1984 + class_187.field_1742.method_492(pos).Rotated(partRenderInfo.field_1985);
     }
 }
