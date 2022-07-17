@@ -27,6 +27,7 @@ internal class UeAtoms {
 	
 	private static readonly Random UraniumShakeCounter = new();
 	private static ILHook SimValidationHook;
+	private static Hook AetherBlockerHook;
 
 	public static void AddAtomTypes(){
 		// Aether atom type
@@ -148,16 +149,19 @@ internal class UeAtoms {
 
 		// Uranium visuals (shaking, heating)
 		On.Editor.method_927 += OnAtomRender;
-		// Shaking uranium validation
-		SimValidationHook = new(typeof(Sim).GetMethod("method_1844", BindingFlags.NonPublic | BindingFlags.Static), ModSimValidate);
 		// Molecule editor warning for pure-aether atoms
 		On.MoleculeEditorScreen.method_50 += OnMoleculeEditorRender;
+		// Shaking uranium validation
+		SimValidationHook = new(typeof(Sim).GetMethod("method_1844", BindingFlags.NonPublic | BindingFlags.Static), ModSimValidate);
+		// Blocking unstable pure-aether inputs
+		AetherBlockerHook = new(typeof(Sim).GetMethod("method_1837", BindingFlags.NonPublic | BindingFlags.Instance), CheckInputProduction);
 	}
 
 	public static void Unload(){
 		On.Editor.method_927 -= OnAtomRender;
-		SimValidationHook.Dispose();
 		On.MoleculeEditorScreen.method_50 -= OnMoleculeEditorRender;
+		SimValidationHook.Dispose();
+		AetherBlockerHook.Dispose();
 	}
 
 	public static void DoUraniumDecay(Molecule m, Atom u, HexIndex pos, SolutionEditorBase seb){
@@ -223,6 +227,16 @@ internal class UeAtoms {
 				class_140.method_317("WARNING: Pure-aether molecules require a Glyph of Tranquility to handle.", centreM + new Vector2(471f, 107f), 922, false, false);
 			}
 		}
+	}
+
+	public delegate bool orig_method_1837(Sim self, Molecule toCheck, HashSet<HexIndex> moleculeFootprint);
+	public static bool CheckInputProduction(orig_method_1837 orig, Sim self, Molecule toCheck, HashSet<HexIndex> moleculeFootprint) {
+		bool blocked = orig(self, toCheck, moleculeFootprint);
+		if(!blocked) // if its not blocked by collisions, but is made of Aether and not stabilized, block it
+			if(toCheck.method_1100().Values.Count() > 0 && toCheck.method_1100().Values.Select(u => u.field_2275).All(u => u.Equals(Aether)))
+				if(!toCheck.method_1100().Keys.All(UeParts.TranquilityHexes.Contains))
+					return true;
+		return blocked;
 	}
 
 	// TODO: fix properly in quintessential
