@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 using MonoMod.Cil;
@@ -149,11 +150,14 @@ internal class UeAtoms {
 		On.Editor.method_927 += OnAtomRender;
 		// Shaking uranium validation
 		SimValidationHook = new(typeof(Sim).GetMethod("method_1844", BindingFlags.NonPublic | BindingFlags.Static), ModSimValidate);
+		// Molecule editor warning for pure-aether atoms
+		On.MoleculeEditorScreen.method_50 += OnMoleculeEditorRender;
 	}
 
 	public static void Unload(){
 		On.Editor.method_927 -= OnAtomRender;
 		SimValidationHook.Dispose();
+		On.MoleculeEditorScreen.method_50 -= OnMoleculeEditorRender;
 	}
 
 	public static void DoUraniumDecay(Molecule m, Atom u, HexIndex pos, SolutionEditorBase seb){
@@ -203,6 +207,22 @@ internal class UeAtoms {
 		};
 		diff(copy);
 		return copy;
+	}
+
+	private static void OnMoleculeEditorRender(On.MoleculeEditorScreen.orig_method_50 orig, MoleculeEditorScreen self, float param_4858) {
+		orig(self, param_4858);
+		DynamicData selfData = new(self);
+		// if there's no existing error...
+		if(!selfData.Get<Maybe<LocString>>("field_2661").method_1085()){
+			Molecule m = selfData.Get<Molecule>("field_2656");
+			// and there are only a nonzero amount of Aether atoms...
+			if(m.method_1100().Count > 0 && m.method_1100().Values.Select(u => u.field_2275).All(u => u.Equals(Aether))){
+				// display a warning
+				Vector2 sizeM = new Vector2(1516f, 922f);
+				Vector2 centreM = (class_115.field_1433 / 2 - sizeM / 2 + new Vector2(-2f, -11f)).Rounded();
+				class_140.method_317("WARNING: Pure-aether molecules require a Glyph of Tranquility to handle.", centreM + new Vector2(471f, 107f), 922, false, false);
+			}
+		}
 	}
 
 	// TODO: fix properly in quintessential
