@@ -1,5 +1,5 @@
 Name: UnstableElements
-Version: 1.1.0
+Version: 0.2.1
 DLL: "UnstableElements/bin/Debug/net451/UnstableElements.dll"
 Dependencies:
 - Name: Quintessential
