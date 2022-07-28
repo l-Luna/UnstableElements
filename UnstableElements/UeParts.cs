@@ -1,12 +1,10 @@
-﻿using System.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 using MonoMod.Utils;
 
 using Quintessential;
 using MonoMod.RuntimeDetour;
 using System.Reflection;
-using System.Data;
 using System;
 
 namespace UnstableElements;
@@ -182,7 +180,7 @@ internal class UeParts{
             renderer.method_528(TranquilityMetalBowl, qsSite, Vector2.Zero);
             renderer.method_529(TranquilityQuicksilverSymbol, qsSite, Vector2.Zero);
 			
-            double time = System.Math.Sin(new struct_27(Time.Now().Ticks).method_603());
+            double time = Math.Sin(new struct_27(Time.Now().Ticks).method_603());
             float pulse = (float)(time / 3 + .66);
             if(editor.method_503() != enum_128.Stopped && new DynamicData(part).TryGet(TranquilityPowerId, out bool? power) && power == true){
                 Color tint = Color.White;
@@ -314,7 +312,7 @@ internal class UeParts{
                     // if we're in the accepting phase...
                     if(!mySimState.field_2743){
                         // if we have an unheld unbonded quintessence at the centre...
-                        if(FindAtom(simData, part, new(0, 0), HeldGrippers).method_99(out AtomReference quint)
+                        if(first && FindAtom(simData, part, new(0, 0), HeldGrippers).method_99(out AtomReference quint)
                             && quint.field_2280 == AtomTypes.field_1690
                             && !quint.field_2281 && !quint.field_2282){
                             // and no atoms are blocking our outputs...
@@ -363,7 +361,7 @@ internal class UeParts{
                         molecules.Add(stabilizedAether);
                         molecules.Add(stbAetherRot);
 
-                        mySimState.field_2743 = false;
+                        // state is reset automatically
                     }
                 }
             }
