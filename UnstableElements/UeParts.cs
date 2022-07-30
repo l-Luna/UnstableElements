@@ -78,7 +78,7 @@ internal static class UeParts{
 				new(0, -1)
 			}, // Spaces used
 			field_1551 = Permissions.None,
-			//CustomPermissionCheck = perms => perms.Contains("unstable-elements-irradiation")
+			CustomPermissionCheck = perms => perms.Contains("UnstableElements:irradiation")
 		};
 
 		Volatility = new(){
@@ -95,7 +95,7 @@ internal static class UeParts{
 				new(0, 0)
 			}, // Spaces used
 			field_1551 = Permissions.None,
-			//CustomPermissionCheck = perms => perms.Contains("unstable-elements-volatility")
+			CustomPermissionCheck = perms => perms.Contains("UnstableElements:volatility")
 		};
 
 		Tranquility = new(){
@@ -114,7 +114,7 @@ internal static class UeParts{
 				new(0, 1)
 			}, // Spaces used
 			field_1551 = Permissions.None,
-			//CustomPermissionCheck = perms => perms.Contains("unstable-elements-tranquility")
+			CustomPermissionCheck = perms => perms.Contains("UnstableElements:tranquility")
 		};
 
 		Sublimation = new(){
@@ -135,7 +135,7 @@ internal static class UeParts{
 				new(-1, -1)
 			}, // Spaces used
 			field_1551 = Permissions.None,
-			//CustomPermissionCheck = perms => perms.Contains("unstable-elements-sublimation")
+			CustomPermissionCheck = perms => perms.Contains("UnstableElements:sublimation")
 		};
 
 		QApi.AddPartType(Irradiation, (part, pos, editor, renderer) => {
@@ -237,10 +237,11 @@ internal static class UeParts{
 		QApi.AddPartTypeToPanel(Volatility, PartTypes.field_1775);
 		QApi.AddPartTypeToPanel(Tranquility, PartTypes.field_1775);
 		QApi.AddPartTypeToPanel(Sublimation, PartTypes.field_1775);
-		//QApi.AddPuzzlePermission("unstable-elements-irradiation", "Glyph of Irradiation");
-		//QApi.AddPuzzlePermission("unstable-elements-volatility", "Glyph of Volatility");
-		//QApi.AddPuzzlePermission("unstable-elements-tranquility", "Glyph of Tranquility");
-		//QApi.AddPuzzlePermission("unstable-elements-sublimation", "Glyph of Sublimation");
+		
+		QApi.AddPuzzlePermission("UnstableElements:irradiation", "Glyph of Irradiation", "Unstable Elements");
+		QApi.AddPuzzlePermission("UnstableElements:volatility", "Glyph of Volatility", "Unstable Elements");
+		QApi.AddPuzzlePermission("UnstableElements:tranquility", "Glyph of Tranquility", "Unstable Elements");
+		QApi.AddPuzzlePermission("UnstableElements:sublimation", "Glyph of Sublimation", "Unstable Elements");
 
 		QApi.RunAfterCycle((_, _) => {
 			// first thing
