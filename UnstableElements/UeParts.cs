@@ -322,7 +322,7 @@ internal static class UeParts{
 						         && quint.field_2280 == AtomTypes.field_1690
 						         && !quint.field_2281 && !quint.field_2282){
 							// and no atoms are blocking our outputs...
-							if(!FindAtom(simData, part, new(1, 0), HeldGrippers).method_1085()
+							if(!FindAtom(simData, part, new(0, 1), HeldGrippers).method_1085()
 							   && !FindAtom(simData, part, new(1, 1), HeldGrippers).method_1085()
 							   && !FindAtom(simData, part, new(0, -1), HeldGrippers).method_1085()
 							   && !FindAtom(simData, part, new(-1, -1), HeldGrippers).method_1085()){
