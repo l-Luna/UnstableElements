@@ -1,4 +1,5 @@
 Name: UnstableElements
+Title: Unstable Elements
 Version: 0.2.2
 DLL: "UnstableElements/bin/Debug/net452/UnstableElements.dll"
 Dependencies:
