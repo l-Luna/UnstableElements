@@ -106,7 +106,7 @@ internal static class UeAtoms{
 		QApi.RunAfterCycle((sim, first) => {
 			if(!first){
 				List<Molecule> toRemove = new();
-				var molecules = new DynamicData(sim).Get<List<Molecule>>("field_3823");
+				var molecules = sim.field_3823;
 				foreach(var molecule in molecules){
 					bool hasAether = false, hasNonAether = false;
 					foreach(KeyValuePair<HexIndex, Atom> atom in molecule.method_1100())
@@ -122,7 +122,7 @@ internal static class UeAtoms{
 
 				foreach(var it in toRemove){
 					foreach(KeyValuePair<HexIndex, Atom> atom in it.method_1100()){
-						var seb = new DynamicData(sim).Get<SolutionEditorBase>("field_3818");
+						var seb = sim.field_3818;
 						seb.field_3936.Add(new class_228(seb, (enum_7)1, class_187.field_1742.method_492(atom.Key) + new Vector2(80f, 0.0f), class_238.field_1989.field_90.field_240 /* or 42? */, 30f, Vector2.Zero, 0.0f));
 					}
 
@@ -135,9 +135,8 @@ internal static class UeAtoms{
 		QApi.RunAfterCycle((sim, first) => {
 			if(first) return;
 			
-			var simData = new DynamicData(sim);
-			var seb = simData.Get<SolutionEditorBase>("field_3818");
-			var molecules = simData.Get<List<Molecule>>("field_3823");
+			var seb = sim.field_3818;
+			var molecules = sim.field_3823;
 			foreach(var molecule in molecules){
 				foreach(KeyValuePair<HexIndex, Atom> atom in molecule.method_1100()){
 					var type = atom.Value.field_2275;
