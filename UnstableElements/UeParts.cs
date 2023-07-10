@@ -16,8 +16,6 @@ using Texture = class_256;
 
 internal static class UeParts{
 	
-	// TODO: move FindAtom and HeldGrippers to Quintessential
-
 	public static PartType Irradiation, Volatility, Tranquility, Sublimation;
 
 	public static Texture IrradiationBase = class_235.method_615("textures/parts/leppa/UnstableElements/irradiation_base");
@@ -50,10 +48,6 @@ internal static class UeParts{
 		new(1, -3), new(2, -3), new(3, -3),
 		new(1, -4), new(2, -4), new(3, -4), new(4, -4)
 	};
-
-	// these get reset at the start of a cycle after being collected by vanilla
-	private static List<Part> HeldGrippers;
-	private static Hook FindHeldGrippersHook;
 
 	public static void AddPartTypes(){
 		for(int i = 0; i < 16; i++){
@@ -142,7 +136,7 @@ internal static class UeParts{
 			Vector2 vector2 = new(83f, 119f);
 			renderer.method_523(IrradiationBase, new Vector2(0.0f, -1f), vector2, 0.0f);
 			foreach(HexIndex idx in part.method_1159().field_1540){
-				if(idx.Q == 0 && idx.R == 0){
+				if(idx is { Q: 0, R: 0 }){
 					renderer.method_530(class_238.field_1989.field_90.field_164 /*bonder_shadow*/, idx, 0);
 					renderer.method_528(IrradiationMetalBowl, idx, Vector2.Zero);
 					renderer.method_529(IrradiationGoldSymbol, idx, Vector2.Zero);
@@ -258,10 +252,10 @@ internal static class UeParts{
 				// look for 3 unheld QSs and free gold
 				if(type == Irradiation){
 					// if all the atoms exist...
-					if(FindAtom(sim, part, new HexIndex(0, 0), HeldGrippers).method_99(out AtomReference gold)
-					   && FindAtom(sim, part, new HexIndex(-1, 1), HeldGrippers).method_99(out AtomReference qs1)
-					   && FindAtom(sim, part, new HexIndex(1, 0), HeldGrippers).method_99(out AtomReference qs2)
-					   && FindAtom(sim, part, new HexIndex(0, -1), HeldGrippers).method_99(out AtomReference qs3)){
+					if(sim.FindAtomRelative(part, new HexIndex(0, 0)).method_99(out AtomReference gold)
+					   && sim.FindAtomRelative(part, new(-1, 1)).method_99(out AtomReference qs1)
+					   && sim.FindAtomRelative(part, new(1, 0)).method_99(out AtomReference qs2)
+					   && sim.FindAtomRelative(part, new(0, -1)).method_99(out AtomReference qs3)){
 						// and are the right types...
 						if(gold.field_2280 == AtomTypes.field_1686
 						   && qs1.field_2280 == AtomTypes.field_1680
@@ -271,7 +265,7 @@ internal static class UeParts{
 							if(!qs1.field_2281 && !qs1.field_2282
 							                   && !qs2.field_2281 && !qs2.field_2282
 							                   && !qs3.field_2281 && !qs3.field_2282){
-								// transmutate the gold and destroy the quicksilver
+								// transmute the gold and destroy the quicksilver
 								gold.field_2277.method_1106(UeAtoms.Uranium, gold.field_2278);
 								qs1.field_2277.method_1107(qs1.field_2278);
 								qs2.field_2277.method_1107(qs2.field_2278);
@@ -296,13 +290,13 @@ internal static class UeParts{
 					}
 				}
 				else if(type == Volatility){
-					if(FindAtom(sim, part, new HexIndex(0, 0), HeldGrippers).method_99(out AtomReference uranium))
+					if(sim.FindAtomRelative(part, new(0, 0)).method_99(out AtomReference uranium))
 						if(UeAtoms.IsUraniumState(uranium.field_2280))
 							UeAtoms.DoUraniumDecay(uranium.field_2277, uranium.field_2279, uranium.field_2278, seb);
 				}
 				else if(type == Tranquility){
 					bool isPowered =
-						FindAtom(sim, part, new HexIndex(0, 1), HeldGrippers).method_99(out AtomReference qs)
+						sim.FindAtomRelative(part, new(0, 1)).method_99(out AtomReference qs)
 						&& qs.field_2280 == AtomTypes.field_1680; // is QS
 					new DynamicData(part).Set(TranquilityPowerId, isPowered);
 					if(isPowered){
@@ -316,15 +310,15 @@ internal static class UeParts{
 					var mySimState = simStates[part];
 					// if we're in the accepting phase...
 					if(!mySimState.field_2743){
-						// if we have an unheld unbonded quintessence at the centre...
-						if(first && FindAtom(sim, part, new(0, 0), HeldGrippers).method_99(out AtomReference quint)
+						// if we have an unheld & unbonded quintessence at the centre...
+						if(first && sim.FindAtomRelative(part, new(0, 0)).method_99(out AtomReference quint)
 						         && quint.field_2280 == AtomTypes.field_1690
 						         && !quint.field_2281 && !quint.field_2282){
 							// and no atoms are blocking our outputs...
-							if(!FindAtom(sim, part, new(0, 1), HeldGrippers).method_1085()
-							   && !FindAtom(sim, part, new(1, 1), HeldGrippers).method_1085()
-							   && !FindAtom(sim, part, new(0, -1), HeldGrippers).method_1085()
-							   && !FindAtom(sim, part, new(-1, -1), HeldGrippers).method_1085()){
+							if(!sim.FindAtomRelative(part, new(0, 1)).method_1085()
+							   && !sim.FindAtomRelative(part, new(1, 1)).method_1085()
+							   && !sim.FindAtomRelative(part, new(0, -1)).method_1085()
+							   && !sim.FindAtomRelative(part, new(-1, -1)).method_1085()){
 								// destroy the quintessence
 								quint.field_2277.method_1107(quint.field_2278);
 								// set this part to be inactive the rest of the cycle
@@ -372,31 +366,11 @@ internal static class UeParts{
 			}
 		});
 
-		FindHeldGrippersHook = new(
-			typeof(Sim).GetMethod("method_1832", BindingFlags.NonPublic | BindingFlags.Instance),
-			FindHeldGrippers
-		);
-
 		On.SolutionEditorBase.method_1984 += DrawTranquilityField;
 	}
 
 	public static void Unload(){
-		FindHeldGrippersHook.Dispose();
-
 		On.SolutionEditorBase.method_1984 -= DrawTranquilityField;
-	}
-
-	private static Maybe<AtomReference> FindAtom(Sim sim, Part self, HexIndex offset, List<Part> allParts){
-		HexIndex position = self.method_1184(offset);
-		var simStates = sim.field_3821;
-		foreach(Molecule molecule in sim.field_3823){
-			if(molecule.method_1100().TryGetValue(position, out Atom atom)){
-				bool flag = allParts.Any(part => simStates[part].field_2724 == position);
-				return new AtomReference(molecule, position, atom.field_2275, atom, flag);
-			}
-		}
-
-		return struct_18.field_1431;
 	}
 
 	private static void DrawForPartWithTint(class_195 renderer, Texture tex, Vector2 offset, Vector2 size, float rotation, Color c){
@@ -423,20 +397,6 @@ internal static class UeParts{
 				class_135.method_262(TranquilityZoneHex, tint, tf);
 			}
 		}
-	}
-
-	private delegate void orig_method_1832(Sim self, bool first);
-	private static void FindHeldGrippers(orig_method_1832 orig, Sim self, bool first){
-		List<Part> allParts = self.field_3818.method_502().field_3919;
-		var simStates = self.field_3821;
-
-		HeldGrippers = new();
-		foreach(var part in allParts)
-			foreach(var gripper in part.field_2696)
-				if(simStates[gripper].field_2729.method_1085())
-					HeldGrippers.Add(gripper);
-
-		orig(self, first);
 	}
 
 	private static Vector2 RelativeToGlobal(class_236 partRenderInfo, HexIndex pos) => partRenderInfo.field_1984 + class_187.field_1742.method_492(pos).Rotated(partRenderInfo.field_1985);
