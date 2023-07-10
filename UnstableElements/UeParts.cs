@@ -249,20 +249,19 @@ internal static class UeParts{
 		});
 
 		QApi.RunAfterCycle((sim, first) => {
-			var simData = new DynamicData(sim);
-			var seb = simData.Get<SolutionEditorBase>("field_3818");
-			List<Part> allParts = simData.Invoke<Solution>("method_1817").field_3919;
-			var simStates = simData.Get<Dictionary<Part, PartSimState>>("field_3821");
+			var seb = sim.field_3818;
+			List<Part> allParts = seb.method_502().field_3919;
+			var simStates = sim.field_3821;
 
 			foreach(var part in allParts){
 				var type = part.method_1159();
 				// look for 3 unheld QSs and free gold
 				if(type == Irradiation){
 					// if all the atoms exist...
-					if(FindAtom(simData, part, new HexIndex(0, 0), HeldGrippers).method_99(out AtomReference gold)
-					   && FindAtom(simData, part, new HexIndex(-1, 1), HeldGrippers).method_99(out AtomReference qs1)
-					   && FindAtom(simData, part, new HexIndex(1, 0), HeldGrippers).method_99(out AtomReference qs2)
-					   && FindAtom(simData, part, new HexIndex(0, -1), HeldGrippers).method_99(out AtomReference qs3)){
+					if(FindAtom(sim, part, new HexIndex(0, 0), HeldGrippers).method_99(out AtomReference gold)
+					   && FindAtom(sim, part, new HexIndex(-1, 1), HeldGrippers).method_99(out AtomReference qs1)
+					   && FindAtom(sim, part, new HexIndex(1, 0), HeldGrippers).method_99(out AtomReference qs2)
+					   && FindAtom(sim, part, new HexIndex(0, -1), HeldGrippers).method_99(out AtomReference qs3)){
 						// and are the right types...
 						if(gold.field_2280 == AtomTypes.field_1686
 						   && qs1.field_2280 == AtomTypes.field_1680
@@ -297,13 +296,13 @@ internal static class UeParts{
 					}
 				}
 				else if(type == Volatility){
-					if(FindAtom(simData, part, new HexIndex(0, 0), HeldGrippers).method_99(out AtomReference uranium))
+					if(FindAtom(sim, part, new HexIndex(0, 0), HeldGrippers).method_99(out AtomReference uranium))
 						if(UeAtoms.IsUraniumState(uranium.field_2280))
 							UeAtoms.DoUraniumDecay(uranium.field_2277, uranium.field_2279, uranium.field_2278, seb);
 				}
 				else if(type == Tranquility){
 					bool isPowered =
-						FindAtom(simData, part, new HexIndex(0, 1), HeldGrippers).method_99(out AtomReference qs)
+						FindAtom(sim, part, new HexIndex(0, 1), HeldGrippers).method_99(out AtomReference qs)
 						&& qs.field_2280 == AtomTypes.field_1680; // is QS
 					new DynamicData(part).Set(TranquilityPowerId, isPowered);
 					if(isPowered){
@@ -318,14 +317,14 @@ internal static class UeParts{
 					// if we're in the accepting phase...
 					if(!mySimState.field_2743){
 						// if we have an unheld unbonded quintessence at the centre...
-						if(first && FindAtom(simData, part, new(0, 0), HeldGrippers).method_99(out AtomReference quint)
+						if(first && FindAtom(sim, part, new(0, 0), HeldGrippers).method_99(out AtomReference quint)
 						         && quint.field_2280 == AtomTypes.field_1690
 						         && !quint.field_2281 && !quint.field_2282){
 							// and no atoms are blocking our outputs...
-							if(!FindAtom(simData, part, new(0, 1), HeldGrippers).method_1085()
-							   && !FindAtom(simData, part, new(1, 1), HeldGrippers).method_1085()
-							   && !FindAtom(simData, part, new(0, -1), HeldGrippers).method_1085()
-							   && !FindAtom(simData, part, new(-1, -1), HeldGrippers).method_1085()){
+							if(!FindAtom(sim, part, new(0, 1), HeldGrippers).method_1085()
+							   && !FindAtom(sim, part, new(1, 1), HeldGrippers).method_1085()
+							   && !FindAtom(sim, part, new(0, -1), HeldGrippers).method_1085()
+							   && !FindAtom(sim, part, new(-1, -1), HeldGrippers).method_1085()){
 								// destroy the quintessence
 								quint.field_2277.method_1107(quint.field_2278);
 								// set this part to be inactive the rest of the cycle
@@ -339,13 +338,13 @@ internal static class UeParts{
 									new(0, -1),
 									new(-1, -1)
 								};
-								var collisions = simData.Get<List<Sim.struct_122>>("field_3826");
+								List<Sim.struct_122> collisions = sim.field_3826;
 								foreach(var hex in outputs){
 									Vector2 vector2 = class_187.field_1742.method_491(part.method_1184(hex), Vector2.Zero);
 									Sim.struct_122 collision = new(){
 										field_3850 = 0,
 										field_3851 = vector2,
-										field_3852 = simData.Get<float>("field_3832")
+										field_3852 = 15
 									};
 									collisions.Add(collision);
 								}
@@ -363,7 +362,7 @@ internal static class UeParts{
 						stbAetherRot.method_1105(new Atom(AtomTypes.field_1675), part.method_1184(new HexIndex(0, -1)));
 						stbAetherRot.method_1112(enum_126.Standard, part.method_1184(new HexIndex(0, -1)), part.method_1184(new HexIndex(-1, -1)), struct_18.field_1431);
 
-						var molecules = simData.Get<List<Molecule>>("field_3823");
+						List<Molecule> molecules = sim.field_3823;
 						molecules.Add(stabilizedAether);
 						molecules.Add(stbAetherRot);
 
@@ -387,10 +386,10 @@ internal static class UeParts{
 		On.SolutionEditorBase.method_1984 -= DrawTranquilityField;
 	}
 
-	private static Maybe<AtomReference> FindAtom(DynamicData simData, Part self, HexIndex offset, List<Part> allParts){
+	private static Maybe<AtomReference> FindAtom(Sim sim, Part self, HexIndex offset, List<Part> allParts){
 		HexIndex position = self.method_1184(offset);
-		var simStates = simData.Get<Dictionary<Part, PartSimState>>("field_3821");
-		foreach(Molecule molecule in simData.Get<List<Molecule>>("field_3823")){
+		var simStates = sim.field_3821;
+		foreach(Molecule molecule in sim.field_3823){
 			if(molecule.method_1100().TryGetValue(position, out Atom atom)){
 				bool flag = allParts.Any(part => simStates[part].field_2724 == position);
 				return new AtomReference(molecule, position, atom.field_2275, atom, flag);
@@ -428,9 +427,8 @@ internal static class UeParts{
 
 	private delegate void orig_method_1832(Sim self, bool first);
 	private static void FindHeldGrippers(orig_method_1832 orig, Sim self, bool first){
-		var simData = new DynamicData(self);
-		List<Part> allParts = simData.Invoke<Solution>("method_1817").field_3919;
-		var simStates = simData.Get<Dictionary<Part, PartSimState>>("field_3821");
+		List<Part> allParts = self.field_3818.method_502().field_3919;
+		var simStates = self.field_3821;
 
 		HeldGrippers = new();
 		foreach(var part in allParts)
