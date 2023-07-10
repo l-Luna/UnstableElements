@@ -1,7 +1,9 @@
 Name: UnstableElements
 Title: Unstable Elements
-Version: 0.2.2
+Desc: "Introduces the unstable elements Aether and Uranium, and the glyphs that act on them."
+Version: 0.2.3
+Icon: "textures/icons/UnstableElements"
 DLL: "UnstableElements/bin/Debug/net452/UnstableElements.dll"
 Dependencies:
 - Name: Quintessential
-  Version: 0.3.0
+  Version: 0.4.0
