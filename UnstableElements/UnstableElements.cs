@@ -15,10 +15,12 @@ public class UnstableElements : QuintessentialMod{
 	public override void Unload(){
 		UeAtoms.Unload();
 		UeParts.Unload();
+		UeSolitaire.Unload();
 	}
 
 	public override void LoadPuzzleContent(){
 		UeAtoms.AddAtomTypes();
 		UeParts.AddPartTypes();
+		UeSolitaire.Load();
 	}
 }
