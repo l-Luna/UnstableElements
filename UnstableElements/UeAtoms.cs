@@ -49,7 +49,7 @@ internal static class UeAtoms{
 
 		// Uranium atom types
 		for(int phase = 0; phase < 3; phase++)
-			for(int turn = 0; turn < 2; turn++){
+			for(int turn = 0; turn < 3; turn++){
 				AtomType isotope = new(){
 					field_2283 = 65,
 					field_2284 = class_134.method_254("Uranium"),
