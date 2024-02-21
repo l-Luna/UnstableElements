@@ -113,17 +113,20 @@ internal static class UeAtoms{
 			
 			var seb = sim.field_3818;
 			var molecules = sim.field_3823;
-			foreach(var molecule in molecules)
+			foreach(var molecule in molecules){
+				// atoms of initial uranium only decay if the molecule containing them is grabbed
+				bool grabbed = sim.field_3821.Values.Any(state => state.field_2729 == molecule);
 				foreach(KeyValuePair<HexIndex, Atom> atom in molecule.method_1100())
 					if(!UeParts.TranquilityHexes.Contains(atom.Key))
 						for(var idx = 0; idx < UraniumIsotopes.Count; idx++)
 							if(atom.Value.field_2275.QuintAtomType == UraniumIsotopes[idx].QuintAtomType){
 								if(idx == UraniumIsotopes.Count - 1)
 									DoUraniumDecay(molecule, atom.Value, atom.Key, seb);
-								else
+								else if(idx > 0 || grabbed)
 									atom.Value.field_2275 = UraniumIsotopes[idx + 1];
 								break;
 							}
+			}
 		});
 
 		// Uranium visuals (shaking, heating)
