@@ -9,7 +9,6 @@ using Quintessential;
 
 namespace UnstableElements;
 
-using MetalAtomColours = class_8;
 using QuintessenceAtomColours = class_229;
 
 using AtomTypes = class_175;
@@ -19,9 +18,9 @@ internal static class UeAtoms{
 	
 	public static AtomType Aether, Uranium;
 
-	private static AtomType UraniumT2, UShaking1, UShaking1T2, UShaking2, UShaking2T2;
-	private static Dictionary<AtomType, AtomType> Heating;
+	private static readonly List<AtomType> UraniumIsotopes = new(), SlowShakingIso = new(), FastShakingIso = new();
 
+	private static readonly AtomTypeEq AtomComparator = new();
 	private static readonly Random UraniumShakeCounter = new();
 	private static ILHook SimValidationHook;
 	private static Hook AetherBlockerHook;
@@ -29,7 +28,6 @@ internal static class UeAtoms{
 	public static void AddAtomTypes(){
 		// Aether atom type
 		Aether = new(){
-			// TODO: remove byte ID
 			field_2283 = 64, /*ID*/
 			field_2284 = class_134.method_254("Aether"), /*Non-local Name*/
 			field_2285 = class_134.method_253("Elemental Aether", string.Empty), /*Atomic Name*/
@@ -47,60 +45,38 @@ internal static class UeAtoms{
 		Aether.field_2296 /*Non-metal?*/ = true;
 		Aether.QuintAtomType = "UnstableElements:aether";
 
-		// Uranium atom type
-		Uranium = new(){
-			field_2283 = 65, // TODO: remove byte ID
-			field_2284 = class_134.method_254("Uranium"),
-			field_2285 = class_134.method_253("Elemental Uranium", string.Empty),
-			field_2286 = class_134.method_253("Uranium", string.Empty),
-			field_2287 = class_235.method_615("textures/atoms/leppa/UnstableElements/uranium_symbol"),
-			field_2288 = class_238.field_1989.field_81.field_599
-		};
-		MetalAtomColours uraniumColours = new(){
-			field_13 = class_238.field_1989.field_81.field_577, /*Diffuse*/
-			field_14 = class_235.method_615("textures/atoms/leppa/UnstableElements/uranium_lightramp"), /*Lightramp*/
-			field_15 = class_238.field_1989.field_81.field_601 /*Rimlight*/
-		};
-		Uranium.field_2291 = uraniumColours;
-		Uranium.field_2294 /*Metal?*/ = true;
-		Uranium.QuintAtomType = "UnstableElements:uranium";
-
 		QApi.AddAtomType(Aether);
+
+		// Uranium atom types
+		for(int phase = 0; phase < 3; phase++)
+			for(int turn = 0; turn < 2; turn++){
+				AtomType isotope = new(){
+					field_2283 = 65,
+					field_2284 = class_134.method_254("Uranium"),
+					field_2285 = class_134.method_253("Elemental Uranium", string.Empty),
+					field_2286 = class_134.method_253("Uranium", string.Empty),
+					field_2287 = class_235.method_615($"textures/atoms/leppa/UnstableElements/uranium_symbol_{phase}"),
+					field_2288 = class_238.field_1989.field_81.field_599,
+					field_2291 = new(){
+						field_13 = class_238.field_1989.field_81.field_577, /*Diffuse*/
+						field_14 = class_235.method_615($"textures/atoms/leppa/UnstableElements/uranium_lightramp_{phase}"), /*Lightramp*/
+						field_15 = class_238.field_1989.field_81.field_601 /*Rimlight*/
+					}, /*Colours*/
+					field_2294 = true /*Metal*/
+				};
+				if(phase == 0 && turn == 0){
+					isotope.QuintAtomType = "UnstableElements:uranium";
+					Uranium = isotope;
+				}else
+					isotope.QuintAtomType = $"UnstableElements:uranium:{phase}_{turn}";
+				UraniumIsotopes.Add(isotope);
+				if(phase == 1)
+					SlowShakingIso.Add(isotope);
+				else if(phase == 2)
+					FastShakingIso.Add(isotope);
+			}
+		
 		QApi.AddAtomType(Uranium);
-
-		// Uranium shaking atom types
-		UraniumT2 = SimpleCloneMetalType(Uranium, u => u.QuintAtomType = "UnstableElements:uranium:stable_turn_2");
-
-		UShaking1 = SimpleCloneMetalType(UraniumT2, u => {
-			u.field_2287 /*Symbol*/ = class_235.method_615("textures/atoms/leppa/UnstableElements/uranium_x2_symbol");
-			u.field_2291 /*Metal colours*/ = new(){
-				field_13 /*Diffuse*/ = u.field_2291.field_13,
-				field_14 /*Lightramp*/ = class_235.method_615("textures/atoms/leppa/UnstableElements/uranium_x2_lightramp"),
-				field_15 /*Rimlight*/ = u.field_2291.field_15
-			};
-			u.QuintAtomType = "UnstableElements:uranium:shaking_turn_1";
-		});
-		UShaking1T2 = SimpleCloneMetalType(UShaking1, u => u.QuintAtomType = "UnstableElements:uranium:shaking_turn_2");
-
-		UShaking2 = SimpleCloneMetalType(UShaking1T2, u => {
-			u.field_2287 /*Symbol*/ = class_235.method_615("textures/atoms/leppa/UnstableElements/uranium_x3_symbol");
-			u.field_2291 /*Metal colours*/ = new(){
-				field_13 /*Diffuse*/ = u.field_2291.field_13,
-				field_14 /*Lightramp*/ = class_235.method_615("textures/atoms/leppa/UnstableElements/uranium_x3_lightramp"),
-				field_15 /*Rimlight*/ = u.field_2291.field_15
-			};
-			u.QuintAtomType = "UnstableElements:uranium:shaking_2";
-		});
-		UShaking2T2 = SimpleCloneMetalType(UShaking2, u => u.QuintAtomType = "UnstableElements:uranium:shaking_2_turn_2");
-
-
-		Heating = new(new AtomTypeEq()){
-			{ Uranium, UraniumT2 },
-			{ UraniumT2, UShaking1 },
-			{ UShaking1, UShaking1T2 },
-			{ UShaking1T2, UShaking2 },
-			{ UShaking2, UShaking2T2 }
-		};
 
 		// Aether self-destruction
 		QApi.RunAfterCycle((sim, first) => {
@@ -137,17 +113,17 @@ internal static class UeAtoms{
 			
 			var seb = sim.field_3818;
 			var molecules = sim.field_3823;
-			foreach(var molecule in molecules){
-				foreach(KeyValuePair<HexIndex, Atom> atom in molecule.method_1100()){
-					var type = atom.Value.field_2275;
-					if(!UeParts.TranquilityHexes.Contains(atom.Key)){
-						if(Heating.ContainsKey(type))
-							atom.Value.field_2275 = Heating[type];
-						else if(type == UShaking2T2)
-							DoUraniumDecay(molecule, atom.Value, atom.Key, seb);
-					}
-				}
-			}
+			foreach(var molecule in molecules)
+				foreach(KeyValuePair<HexIndex, Atom> atom in molecule.method_1100())
+					if(!UeParts.TranquilityHexes.Contains(atom.Key))
+						for(var idx = 0; idx < UraniumIsotopes.Count; idx++)
+							if(atom.Value.field_2275.QuintAtomType == UraniumIsotopes[idx].QuintAtomType){
+								if(idx == UraniumIsotopes.Count - 1)
+									DoUraniumDecay(molecule, atom.Value, atom.Key, seb);
+								else
+									atom.Value.field_2275 = UraniumIsotopes[idx + 1];
+								break;
+							}
 		});
 
 		// Uranium visuals (shaking, heating)
@@ -168,20 +144,17 @@ internal static class UeAtoms{
 	}
 
 	public static void DoUraniumDecay(Molecule m, Atom u, HexIndex pos, SolutionEditorBase seb){
+		AtomType from = u.field_2275;
 		m.method_1106(AtomTypes.field_1681, pos);
-		u.field_2276 = new class_168(seb, 0, (enum_132)1, UShaking2T2, class_238.field_1989.field_81.field_614, 30f);
+		u.field_2276 = new class_168(seb, 0, (enum_132)1, from, class_238.field_1989.field_81.field_614, 30f);
 	}
 
-	public static bool IsUraniumState(AtomType type){
-		return type == Uranium || type == UraniumT2
-			|| type == UShaking1 || type == UShaking1T2
-			|| type == UShaking2 || type == UShaking2T2;
-	}
+	public static bool IsUraniumState(AtomType type) => UraniumIsotopes.Contains(type, AtomComparator);
 
 	private static void OnAtomRender(On.Editor.orig_method_927 orig, AtomType type, Vector2 position, float param_4582, float param_4583, float param_4584, float param_4585, float param_4586, float param_4587, Texture overrideShadow, Texture maskM, bool param_4590){
-		if(type == UShaking1 || type == UShaking1T2)
+		if(SlowShakingIso.Contains(type, AtomComparator))
 			position += new Vector2((UraniumShakeCounter.Next(9) - 4) / 4f, (UraniumShakeCounter.Next(9) - 4) / 4f);
-		if(type == UShaking2 || type == UShaking2T2)
+		if(FastShakingIso.Contains(type, AtomComparator))
 			position += new Vector2((UraniumShakeCounter.Next(9) - 4f) / 2f, (UraniumShakeCounter.Next(9) - 4) / 2f);
 		orig(type, position, param_4582, param_4583, param_4584, param_4585, param_4586, param_4587, overrideShadow, maskM, param_4590);
 	}
@@ -192,28 +165,9 @@ internal static class UeAtoms{
 			cursor.Remove();
 			cursor.EmitDelegate<Func<Atom, AtomType>>(u => {
 				AtomType type = u.field_2275;
-				if(IsUraniumState(type))
-					return Uranium;
-				return type;
+				return IsUraniumState(type) ? Uranium : type;
 			});
 		}
-	}
-
-	private static AtomType SimpleCloneMetalType(AtomType from, Action<AtomType> diff){
-		AtomType copy = new(){
-			field_2283 /*ID*/ = (byte)(from.field_2283 + 1),
-			field_2287 /*Symbol*/ = from.field_2287,
-			field_2288 /*Shadow*/ = from.field_2288,
-			field_2291 /*Metal colours*/ = new(){
-				field_13 /*Diffuse*/ = from.field_2291.field_13,
-				field_14 /*Lightramp*/ = from.field_2291.field_14,
-				field_15 /*Rimlight*/ = from.field_2291.field_15
-			},
-			field_2294 /*Metal?*/ = from.field_2294,
-			QuintAtomType = from.QuintAtomType
-		};
-		diff(copy);
-		return copy;
 	}
 
 	private static void OnMoleculeEditorRender(On.MoleculeEditorScreen.orig_method_50 orig, MoleculeEditorScreen self, float param_4858){
