@@ -14,7 +14,7 @@ using Permissions = enum_149;
 using AtomTypes = class_175;
 using Texture = class_256;
 
-internal static class UeParts{
+internal static class Parts{
 	
 	public static PartType Irradiation, Volatility, Tranquility, Sublimation;
 
@@ -196,7 +196,7 @@ internal static class UeParts{
 				Editor.method_925(Molecule.method_1121(AtomTypes.field_1690), RelativeToGlobal(renderInfo, new(0, 0)), new(0, 0), 0.0f, 1f, 1f - editor.method_504(), 1f, false, null);
 
 			Molecule stabilizedAether = new();
-			stabilizedAether.method_1105(new Atom(UeAtoms.Aether), new(1, 1));
+			stabilizedAether.method_1105(new Atom(Atoms.Aether), new(1, 1));
 			stabilizedAether.method_1105(new Atom(AtomTypes.field_1675), new(0, 1));
 			stabilizedAether.method_1112(enum_126.Standard, new(0, 1), new(1, 1), struct_18.field_1431);
 			Molecule stbAetherRot = stabilizedAether.method_1115(HexRotation.R180);
@@ -266,7 +266,7 @@ internal static class UeParts{
 							                   && !qs2.field_2281 && !qs2.field_2282
 							                   && !qs3.field_2281 && !qs3.field_2282){
 								// transmute the gold and destroy the quicksilver
-								gold.field_2277.method_1106(UeAtoms.Uranium, gold.field_2278);
+								gold.field_2277.method_1106(Atoms.Uranium, gold.field_2278);
 								qs1.field_2277.method_1107(qs1.field_2278);
 								qs2.field_2277.method_1107(qs2.field_2278);
 								qs3.field_2277.method_1107(qs3.field_2278);
@@ -291,8 +291,8 @@ internal static class UeParts{
 				}
 				else if(type == Volatility){
 					if(sim.FindAtomRelative(part, new(0, 0)).method_99(out AtomReference uranium))
-						if(UeAtoms.IsUraniumState(uranium.field_2280))
-							UeAtoms.DoUraniumDecay(uranium.field_2277, uranium.field_2279, uranium.field_2278, seb);
+						if(Atoms.IsUraniumState(uranium.field_2280))
+							Atoms.DoUraniumDecay(uranium.field_2277, uranium.field_2279, uranium.field_2278, seb);
 				}
 				else if(type == Tranquility){
 					bool isPowered =
@@ -348,11 +348,11 @@ internal static class UeParts{
 					else{
 						// otherwise, we're in the producing phase
 						Molecule stabilizedAether = new();
-						stabilizedAether.method_1105(new Atom(UeAtoms.Aether), part.method_1184(new HexIndex(1, 1)));
+						stabilizedAether.method_1105(new Atom(Atoms.Aether), part.method_1184(new HexIndex(1, 1)));
 						stabilizedAether.method_1105(new Atom(AtomTypes.field_1675), part.method_1184(new HexIndex(0, 1)));
 						stabilizedAether.method_1112(enum_126.Standard, part.method_1184(new HexIndex(0, 1)), part.method_1184(new HexIndex(1, 1)), struct_18.field_1431);
 						Molecule stbAetherRot = new();
-						stbAetherRot.method_1105(new Atom(UeAtoms.Aether), part.method_1184(new HexIndex(-1, -1)));
+						stbAetherRot.method_1105(new Atom(Atoms.Aether), part.method_1184(new HexIndex(-1, -1)));
 						stbAetherRot.method_1105(new Atom(AtomTypes.field_1675), part.method_1184(new HexIndex(0, -1)));
 						stbAetherRot.method_1112(enum_126.Standard, part.method_1184(new HexIndex(0, -1)), part.method_1184(new HexIndex(-1, -1)), struct_18.field_1431);
 

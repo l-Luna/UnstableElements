@@ -13,14 +13,14 @@ public class UnstableElements : QuintessentialMod{
 	}
 
 	public override void Unload(){
-		UeAtoms.Unload();
-		UeParts.Unload();
-		UeSolitaire.Unload();
+		Atoms.Unload();
+		Parts.Unload();
+		Solitaire.Unload();
 	}
 
 	public override void LoadPuzzleContent(){
-		UeAtoms.AddAtomTypes();
-		UeParts.AddPartTypes();
-		UeSolitaire.Load();
+		Atoms.AddAtomTypes();
+		Parts.AddPartTypes();
+		Solitaire.Load();
 	}
 }

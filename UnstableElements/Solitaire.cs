@@ -11,7 +11,7 @@ namespace UnstableElements;
 using Texture = class_256;
 using AtomTypes = class_175;
 
-public class UeSolitaire{
+public class Solitaire{
 
 	// TODO: just run hookgen with private methods on please
 	private static Hook hookJournalEntryRender, hookSolitaireStateGetter, hookSolitaireStateSetter;
@@ -45,15 +45,15 @@ public class UeSolitaire{
 		
 		hookJournalEntryRender = new Hook(
 			typeof(JournalScreen).GetMethod("method_1040", BindingFlags.Instance | BindingFlags.NonPublic),
-			typeof(UeSolitaire).GetMethod("OnJournalEntryRender", BindingFlags.Static | BindingFlags.NonPublic)
+			typeof(Solitaire).GetMethod("OnJournalEntryRender", BindingFlags.Static | BindingFlags.NonPublic)
 		);
 		hookSolitaireStateGetter = new Hook(
 			typeof(SolitaireScreen).GetMethod("method_1889", BindingFlags.Instance | BindingFlags.NonPublic),
-			typeof(UeSolitaire).GetMethod("OnSolitaireScreenGetState", BindingFlags.Static | BindingFlags.NonPublic)
+			typeof(Solitaire).GetMethod("OnSolitaireScreenGetState", BindingFlags.Static | BindingFlags.NonPublic)
 		);
 		hookSolitaireStateSetter = new Hook(
 			typeof(SolitaireScreen).GetMethod("method_1890", BindingFlags.Instance | BindingFlags.NonPublic),
-			typeof(UeSolitaire).GetMethod("OnSolitaireScreenSetState", BindingFlags.Static | BindingFlags.NonPublic)
+			typeof(Solitaire).GetMethod("OnSolitaireScreenSetState", BindingFlags.Static | BindingFlags.NonPublic)
 		);
 
 		sigmarSprite = class_235.method_615("UeJournal/sigmar");
@@ -92,15 +92,15 @@ public class UeSolitaire{
 				choices.Add(Metals[curMetal]);
 			// could choose aether; higher priority to hopefully give them enough space
 			if(aethers < 6){
-				choices.Add(UeAtoms.Aether);
-				choices.Add(UeAtoms.Aether);
+				choices.Add(Atoms.Aether);
+				choices.Add(Atoms.Aether);
 			}
 
 			if(choices.Count == 0)
 				break; // we're done!
 
 			AtomType next = rng.Choose(choices);
-			if(next == UeAtoms.Aether){
+			if(next == Atoms.Aether){
 				HexIndex pos = RandomFree(state, null, rng, threshold: 6);
 				state.field_3864[pos] = next;
 				aethers++;

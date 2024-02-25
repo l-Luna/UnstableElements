@@ -14,7 +14,7 @@ using QuintessenceAtomColours = class_229;
 using AtomTypes = class_175;
 using Texture = class_256;
 
-internal static class UeAtoms{
+internal static class Atoms{
 	
 	public static AtomType Aether, Uranium;
 
@@ -87,7 +87,7 @@ internal static class UeAtoms{
 					bool hasAether = false, hasNonAether = false;
 					foreach(KeyValuePair<HexIndex, Atom> atom in molecule.method_1100())
 						if(atom.Value.field_2275.Equals(Aether)){
-							if(!UeParts.TranquilityHexes.Contains(atom.Key))
+							if(!Parts.TranquilityHexes.Contains(atom.Key))
 								hasAether = true;
 						}else
 							hasNonAether = true;
@@ -117,7 +117,7 @@ internal static class UeAtoms{
 				// atoms of initial uranium only decay if the molecule containing them is grabbed
 				bool grabbed = sim.field_3821.Values.Any(state => state.field_2729 == molecule);
 				foreach(KeyValuePair<HexIndex, Atom> atom in molecule.method_1100())
-					if(!UeParts.TranquilityHexes.Contains(atom.Key))
+					if(!Parts.TranquilityHexes.Contains(atom.Key))
 						for(var idx = 0; idx < UraniumIsotopes.Count; idx++)
 							if(atom.Value.field_2275.QuintAtomType == UraniumIsotopes[idx].QuintAtomType){
 								if(idx == UraniumIsotopes.Count - 1)
@@ -195,7 +195,7 @@ internal static class UeAtoms{
 		bool blocked = orig(self, toCheck, moleculeFootprint);
 		if(!blocked) // if its not blocked by collisions, but is made of Aether and not stabilized, block it
 			if(toCheck.method_1100().Values.Any() && toCheck.method_1100().Values.Select(u => u.field_2275).All(u => u.Equals(Aether)))
-				if(!toCheck.method_1100().Keys.All(UeParts.TranquilityHexes.Contains))
+				if(!toCheck.method_1100().Keys.All(Parts.TranquilityHexes.Contains))
 					return true;
 		return blocked;
 	}
