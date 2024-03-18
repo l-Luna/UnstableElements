@@ -1,4 +1,5 @@
-﻿using Quintessential;
+﻿using MonoMod.ModInterop;
+using Quintessential;
 
 namespace UnstableElements;
 
@@ -22,5 +23,7 @@ public class UnstableElements : QuintessentialMod{
 		Atoms.AddAtomTypes();
 		Parts.AddPartTypes();
 		Solitaire.Load();
+		// not sure about `static` load ordering so i'll leave this here
+		typeof(UeApi).ModInterop();
 	}
 }

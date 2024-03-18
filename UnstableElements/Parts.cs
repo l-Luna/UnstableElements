@@ -39,6 +39,9 @@ internal static class Parts{
 	public static Texture[] SublimationSaltIris = new Texture[16];
 
 	public static readonly HashSet<HexIndex> TranquilityHexes = new();
+	
+	internal static readonly List<Func<Sim, HashSet<HexIndex>>> OtherStableHexesCallbacks = new();
+	public static readonly HashSet<HexIndex> OtherStableHexes = new();
 
 	private static readonly string TranquilityPowerId = "UnstableElements:tranquility_powered";
 
@@ -237,9 +240,13 @@ internal static class Parts{
 		QApi.AddPuzzlePermission("UnstableElements:tranquility", "Glyph of Tranquility", "Unstable Elements");
 		QApi.AddPuzzlePermission("UnstableElements:sublimation", "Glyph of Sublimation", "Unstable Elements");
 
-		QApi.RunAfterCycle((_, _) => {
+		QApi.RunAfterCycle((sim, _) => {
 			// first thing
 			TranquilityHexes.Clear();
+			
+			OtherStableHexes.Clear();
+			foreach(var cb in OtherStableHexesCallbacks)
+				OtherStableHexes.UnionWith(cb(sim));
 		});
 
 		QApi.RunAfterCycle((sim, first) => {

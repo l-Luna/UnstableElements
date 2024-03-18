@@ -87,7 +87,7 @@ internal static class Atoms{
 					bool hasAether = false, hasNonAether = false;
 					foreach(KeyValuePair<HexIndex, Atom> atom in molecule.method_1100())
 						if(atom.Value.field_2275.Equals(Aether)){
-							if(!Parts.TranquilityHexes.Contains(atom.Key))
+							if(!IsHexStabilized(atom.Key))
 								hasAether = true;
 						}else
 							hasNonAether = true;
@@ -117,7 +117,7 @@ internal static class Atoms{
 				// atoms of initial uranium only decay if the molecule containing them is grabbed
 				bool grabbed = sim.field_3821.Values.Any(state => state.field_2729 == molecule);
 				foreach(KeyValuePair<HexIndex, Atom> atom in molecule.method_1100())
-					if(!Parts.TranquilityHexes.Contains(atom.Key))
+					if(!IsHexStabilized(atom.Key))
 						for(var idx = 0; idx < UraniumIsotopes.Count; idx++)
 							if(atom.Value.field_2275.QuintAtomType == UraniumIsotopes[idx].QuintAtomType){
 								if(idx == UraniumIsotopes.Count - 1)
@@ -132,7 +132,7 @@ internal static class Atoms{
 		// Uranium visuals (shaking, heating)
 		On.Editor.method_927 += OnAtomRender;
 		// Molecule editor warning for pure-aether atoms
-		On.MoleculeEditorScreen.method_50 += OnMoleculeEditorRender;
+		//On.MoleculeEditorScreen.method_50 += OnMoleculeEditorRender;
 		// Shaking uranium validation
 		SimValidationHook = new(typeof(Sim).GetMethod("method_1844", BindingFlags.NonPublic | BindingFlags.Static), ModSimValidate);
 		// Blocking unstable pure-aether inputs
@@ -141,7 +141,7 @@ internal static class Atoms{
 
 	public static void Unload(){
 		On.Editor.method_927 -= OnAtomRender;
-		On.MoleculeEditorScreen.method_50 -= OnMoleculeEditorRender;
+		//On.MoleculeEditorScreen.method_50 -= OnMoleculeEditorRender;
 		SimValidationHook.Dispose();
 		AetherBlockerHook.Dispose();
 	}
@@ -189,13 +189,15 @@ internal static class Atoms{
 		}
 	}
 
+	private static bool IsHexStabilized(HexIndex h) => Parts.TranquilityHexes.Contains(h) || Parts.OtherStableHexes.Contains(h);
+
 	public delegate bool orig_method_1837(Sim self, Molecule toCheck, HashSet<HexIndex> moleculeFootprint);
 
 	public static bool CheckInputProduction(orig_method_1837 orig, Sim self, Molecule toCheck, HashSet<HexIndex> moleculeFootprint){
 		bool blocked = orig(self, toCheck, moleculeFootprint);
 		if(!blocked) // if its not blocked by collisions, but is made of Aether and not stabilized, block it
-			if(toCheck.method_1100().Values.Any() && toCheck.method_1100().Values.Select(u => u.field_2275).All(u => u.Equals(Aether)))
-				if(!toCheck.method_1100().Keys.All(Parts.TranquilityHexes.Contains))
+			if(toCheck.method_1100().Values.Any() && toCheck.method_1100().Values.Select(u => u.field_2275).All(u => u.QuintAtomType.Equals(Aether.QuintAtomType)))
+				if(!toCheck.method_1100().Keys.All(IsHexStabilized))
 					return true;
 		return blocked;
 	}
