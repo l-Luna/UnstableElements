@@ -196,7 +196,7 @@ internal static class Atoms{
 	public static bool CheckInputProduction(orig_method_1837 orig, Sim self, Molecule toCheck, HashSet<HexIndex> moleculeFootprint){
 		bool blocked = orig(self, toCheck, moleculeFootprint);
 		if(!blocked) // if its not blocked by collisions, but is made of Aether and not stabilized, block it
-			if(toCheck.method_1100().Values.Any() && toCheck.method_1100().Values.Select(u => u.field_2275).All(u => u.QuintAtomType.Equals(Aether.QuintAtomType)))
+			if(toCheck.method_1100().Values.Any() && toCheck.method_1100().Values.Select(u => u.field_2275).All(u => u.QuintAtomType?.Equals(Aether.QuintAtomType) ?? false))
 				if(!toCheck.method_1100().Keys.All(IsHexStabilized))
 					return true;
 		return blocked;
